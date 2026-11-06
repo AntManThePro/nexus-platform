@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS Evolutionary Algorithm Visualizer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0f0f2e 100%);
+            color: #00ff87;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 40px; }
+        h1 {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            background: linear-gradient(90deg, #00ff87, #60efff, #ff0080, #ffcc00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .subtitle { color: #60efff; font-size: 0.9rem; margin-bottom: 5px; }
+        .byline { color: #ff0080; font-size: 0.85rem; opacity: 0.8; }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 1024px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+        .canvas-container {
+            border: 2px solid #00ff87;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 135, 0.3), inset 0 0 20px rgba(96, 239, 255, 0.1);
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        .control-panel {
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid #60efff;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 0 15px rgba(96, 239, 255, 0.2);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        .control-title {
+            color: #ffcc00;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #ff0080;
+            padding-bottom: 8px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .control-label {
+            color: #00ff87;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+        .control-value {
+            color: #ffcc00;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ff0080, #00ff87);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #ffcc00;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: #ffcc00;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
+        }
+        .button-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        button {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px 12px;
+            border: 2px solid #00ff87;
+            background: transparent;
+            color: #00ff87;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+        button:hover {
+            background: rgba(0, 255, 135, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 135, 0.5);
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        button.accent {
+            border-color: #ff0080;
+            color: #ff0080;
+        }
+        button.accent:hover {
+            background: rgba(255, 0, 128, 0.1);
+            box-shadow: 0 0 15px rgba(255, 0, 128, 0.5);
+        }
+        .stats-panel {
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid #ffcc00;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+        .stat-label { color: #60efff; }
+        .stat-value { color: #ffcc00; font-weight: bold; }
+        @media (max-width: 768px) {
+            .control-panel { position: static; }
+            h1 { font-size: 1.5rem; }
+            .canvas-container { aspect-ratio: 4 / 3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>NEXUS EVOLUTIONARY ALGORITHM</h1>
+            <p class="subtitle">🧬 Watch genetic algorithms discover optimal solutions in real-time</p>
+            <p class="byline">Engineered by AntManThePro | NEXUS</p>
+        </header>
+
+        <div class="main-grid">
+            <div class="canvas-container">
+                <canvas id="canvas"></canvas>
+            </div>
+
+            <div class="control-panel">
+                <div class="control-title">⚙️ Evolution Control</div>
+
+                <div class="control-group">
+                    <label class="control-label">Population Size</label>
+                    <div class="control-value" id="popValue">50</div>
+                    <input type="range" id="popSize" min="10" max="200" value="50">
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Mutation Rate</label>
+                    <div class="control-value" id="mutValue">10%</div>
+                    <input type="range" id="mutRate" min="0" max="50" step="1" value="10">
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Target Mode</label>
+                    <div class="button-group">
+                        <button onclick="setMode('center')" id="btn-center" class="accent">CENTER</button>
+                        <button onclick="setMode('spiral')" id="btn-spiral">SPIRAL</button>
+                        <button onclick="setMode('mouse')" id="btn-mouse">FOLLOW</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="toggleRun()">▶ START</button>
+                    <button onclick="resetSim()" class="accent">↻ RESET</button>
+                </div>
+
+                <div class="stats-panel">
+                    <div class="control-title">📊 Statistics</div>
+                    <div class="stat-item">
+                        <span class="stat-label">Generation:</span>
+                        <span class="stat-value" id="genCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Avg Fitness:</span>
+                        <span class="stat-value" id="avgFit">0.0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Best Fitness:</span>
+                        <span class="stat-value" id="bestFit">0.0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Population:</span>
+                        <span class="stat-value" id="popCount">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let population = [];
+        let generation = 0;
+        let isRunning = false;
+        let targetMode = 'center';
+        let mouseX = 0;
+        let mouseY = 0;
+        
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        
+        function initPopulation() {
+            const size = parseInt(document.getElementById('popSize').value);
+            population = [];
+            for (let i = 0; i < size; i++) {
+                population.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    fitness: 0
+                });
+            }
+            generation = 0;
+            document.getElementById('genCount').textContent = 0;
+            document.getElementById('popCount').textContent = size;
+        }
+        
+        function getTarget() {
+            switch(targetMode) {
+                case 'center':
+                    return { x: canvas.width / 2, y: canvas.height / 2 };
+                case 'spiral':
+                    return {
+                        x: canvas.width / 2 + Math.cos(generation * 0.02) * 150,
+                        y: canvas.height / 2 + Math.sin(generation * 0.02) * 150
+                    };
+                case 'mouse':
+                    return { x: mouseX, y: mouseY };
+                default:
+                    return { x: canvas.width / 2, y: canvas.height / 2 };
+            }
+        }
+        
+        function calculateFitness(org, target) {
+            const dx = org.x - target.x;
+            const dy = org.y - target.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            return Math.max(0, 500 - dist);
+        }
+        
+        function selectParent(totalFit) {
+            let rand = Math.random() * totalFit;
+            for (let org of population) {
+                rand -= org.fitness;
+                if (rand <= 0) return org;
+            }
+            return population[population.length - 1];
+        }
+        
+        function evolveGeneration() {
+            const target = getTarget();
+            const mutRate = parseInt(document.getElementById('mutRate').value) / 100;
+            
+            // Calculate fitness
+            population.forEach(org => {
+                org.fitness = calculateFitness(org, target);
+            });
+            
+            const totalFit = population.reduce((sum, org) => sum + org.fitness, 0);
+            const avgFit = totalFit / population.length;
+            const bestFit = Math.max(...population.map(org => org.fitness));
+            
+            document.getElementById('avgFit').textContent = avgFit.toFixed(1);
+            document.getElementById('bestFit').textContent = bestFit.toFixed(1);
+            
+            // Create new generation
+            const newPop = [];
+            for (let i = 0; i < population.length; i++) {
+                const p1 = selectParent(totalFit);
+                const p2 = selectParent(totalFit);
+                
+                const child = {
+                    x: (p1.x + p2.x) / 2 + (Math.random() - 0.5) * 20,
+                    y: (p1.y + p2.y) / 2 + (Math.random() - 0.5) * 20,
+                    vx: (p1.vx + p2.vx) / 2,
+                    vy: (p1.vy + p2.vy) / 2,
+                    fitness: 0
+                };
+                
+                if (Math.random() < mutRate) {
+                    child.vx += (Math.random() - 0.5) * 2;
+                    child.vy += (Math.random() - 0.5) * 2;
+                }
+                
+                child.x = Math.max(5, Math.min(canvas.width - 5, child.x));
+                child.y = Math.max(5, Math.min(canvas.height - 5, child.y));
+                
+                newPop.push(child);
+            }
+            
+            population = newPop;
+            generation++;
+            document.getElementById('genCount').textContent = generation;
+        }
+        
+        function animate() {
+            const target = getTarget();
+            
+            // Clear with fade
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Grid
+            ctx.strokeStyle = 'rgba(0, 255, 135, 0.05)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+            
+            // Target
+            ctx.fillStyle = '#ffcc00';
+            ctx.beginPath();
+            ctx.arc(target.x, target.y, 12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ff0080';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Population
+            population.forEach(org => {
+                const hue = (org.fitness / 500) * 120;
+                ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                ctx.beginPath();
+                ctx.arc(org.x, org.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Velocity
+                ctx.strokeStyle = `hsla(${hue}, 100%, 50%, 0.5)`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(org.x, org.y);
+                ctx.lineTo(org.x + org.vx * 8, org.y + org.vy * 8);
+                ctx.stroke();
+                
+                // Update position
+                org.x += org.vx;
+                org.y += org.vy;
+                
+                // Bounce
+                if (org.x < 5 || org.x > canvas.width - 5) org.vx *= -0.8;
+                if (org.y < 5 || org.y > canvas.height - 5) org.vy *= -0.8;
+            });
+            
+            if (isRunning) {
+                evolveGeneration();
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        function toggleRun() {
+            isRunning = !isRunning;
+            document.querySelector('button').textContent = isRunning ? '⏸ PAUSE' : '▶ START';
+        }
+        
+        function resetSim() {
+            isRunning = false;
+            document.querySelector('button').textContent = '▶ START';
+            initPopulation();
+        }
+        
+        function setMode(mode) {
+            targetMode = mode;
+            document.getElementById('btn-center').classList.remove('accent');
+            document.getElementById('btn-spiral').classList.remove('accent');
+            document.getElementById('btn-mouse').classList.remove('accent');
+            document.getElementById('btn-' + mode).classList.add('accent');
+        }
+        
+        document.getElementById('popSize').addEventListener('change', () => {
+            document.getElementById('popValue').textContent = this.value;
+            resetSim();
+        });
+        
+        document.getElementById('mutRate').addEventListener('input', function() {
+            document.getElementById('mutValue').textContent = this.value + '%';
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+        
+        window.addEventListener('resize', resizeCanvas);
+        
+        resizeCanvas();
+        initPopulation();
+        setMode('center');
+        animate();
+    </script>
+</body>
+</html>

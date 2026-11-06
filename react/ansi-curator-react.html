@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANSI Terminal Art Curator | AntManThePro</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a0f2e 100%);
+            color: #00ff87;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .curator-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        .ant-mascot {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .header-title {
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            background: linear-gradient(90deg, #00ff87, #60efff, #ff0080, #ffcc00, #00ff87);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            animation: gradientShift 4s linear infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+            100% { background-position: 0% center; }
+        }
+
+        .header-subtitle {
+            color: #60efff;
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+        }
+
+        .header-meta {
+            color: #ff0080;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .main-workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .editor-section, .preview-section {
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid #00ff87;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 135, 0.3);
+        }
+
+        .section-title {
+            color: #ffcc00;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ff0080;
+            padding-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            color: #00ff87;
+            border: 1px solid #60efff;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: none;
+            line-height: 1.4;
+            caret-color: #ffcc00;
+            outline: none;
+            transition: box-shadow 0.3s;
+        }
+
+        textarea:focus {
+            box-shadow: inset 0 0 15px rgba(96, 239, 255, 0.2), 0 0 15px rgba(0, 255, 135, 0.3);
+        }
+
+        .preview-box {
+            background: #000;
+            border: 1px solid #60efff;
+            border-radius: 4px;
+            padding: 15px;
+            min-height: 400px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            word-break: break-all;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            color: #00ff87;
+            box-shadow: inset 0 0 20px rgba(0, 255, 135, 0.1);
+        }
+
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+            gap: 5px;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #ff0080;
+            border-radius: 4px;
+        }
+
+        .char-button {
+            aspect-ratio: 1;
+            border: 1px solid #00ff87;
+            background: #000;
+            color: #00ff87;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            border-radius: 2px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .char-button:hover {
+            background: rgba(0, 255, 135, 0.2);
+            box-shadow: 0 0 8px rgba(0, 255, 135, 0.5);
+            transform: scale(1.1);
+        }
+
+        .control-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 12px 16px;
+            border: 2px solid #00ff87;
+            background: transparent;
+            color: #00ff87;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: rgba(0, 255, 135, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 135, 0.5);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button.accent {
+            border-color: #ff0080;
+            color: #ff0080;
+        }
+
+        button.accent:hover {
+            background: rgba(255, 0, 128, 0.1);
+            box-shadow: 0 0 15px rgba(255, 0, 128, 0.5);
+        }
+
+        button.success {
+            border-color: #ffcc00;
+            color: #ffcc00;
+        }
+
+        button.success:hover {
+            background: rgba(255, 204, 0, 0.1);
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
+        }
+
+        .gallery-section {
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid #60efff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(96, 239, 255, 0.3);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .gallery-item {
+            background: #000;
+            border: 2px solid #ff0080;
+            border-radius: 4px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            max-height: 200px;
+            overflow: hidden;
+        }
+
+        .gallery-item:hover {
+            border-color: #00ff87;
+            box-shadow: 0 0 15px rgba(0, 255, 135, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .gallery-item-name {
+            color: #ffcc00;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .gallery-item-preview {
+            color: #00ff87;
+            font-size: 0.75rem;
+            line-height: 1.3;
+            white-space: pre-wrap;
+            word-break: break-all;
+            overflow: hidden;
+            max-height: 150px;
+        }
+
+        .gallery-item-remove {
+            margin-top: 8px;
+            padding: 5px 8px;
+            font-size: 0.7rem;
+            width: 100%;
+            border-color: #ff0080;
+            color: #ff0080;
+        }
+
+        .empty-state {
+            color: #60efff;
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.7;
+        }
+
+        .char-input-group {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            background: #000;
+            color: #00ff87;
+            border: 1px solid #60efff;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 10px rgba(96, 239, 255, 0.5);
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #00ff87;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+
+        .stat {
+            color: #ffcc00;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-workspace {
+                grid-template-columns: 1fr;
+            }
+
+            textarea {
+                height: 300px;
+            }
+
+            .preview-box {
+                min-height: 300px;
+            }
+
+            .header-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const ANSICurator = () => {
+            const [content, setContent] = useState('');
+            const [artworks, setArtworks] = useState([]);
+            const [charInput, setCharInput] = useState('');
+            const [currentName, setCurrentName] = useState('Untitled');
+
+            const specialChars = ['█', '▓', '▒', '░', '╔', '╗', '╚', '╝', '═', '║', '✦', '⚡', '◆', '◊', '•', '○', '◈', '★'];
+
+            useEffect(() => {
+                const saved = localStorage.getItem('ansi-artworks');
+                if (saved) setArtworks(JSON.parse(saved));
+            }, []);
+
+            const saveArtwork = () => {
+                if (content.trim() === '') {
+                    alert('Canvas is empty! Add some art first.');
+                    return;
+                }
+                const newArtwork = {
+                    id: Date.now(),
+                    name: currentName || 'Untitled',
+                    content: content
+                };
+                const updated = [...artworks, newArtwork];
+                setArtworks(updated);
+                localStorage.setItem('ansi-artworks', JSON.stringify(updated));
+                setCurrentName('Untitled');
+                alert('Artwork saved! 🎨');
+            };
+
+            const loadArtwork = (id) => {
+                const artwork = artworks.find(a => a.id === id);
+                if (artwork) {
+                    setContent(artwork.content);
+                    setCurrentName(artwork.name);
+                }
+            };
+
+            const removeArtwork = (id, e) => {
+                e.stopPropagation();
+                if (confirm('Delete this artwork?')) {
+                    const updated = artworks.filter(a => a.id !== id);
+                    setArtworks(updated);
+                    localStorage.setItem('ansi-artworks', JSON.stringify(updated));
+                }
+            };
+
+            const insertChar = (char) => {
+                const textarea = document.querySelector('textarea');
+                if (textarea) {
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const newContent = content.substring(0, start) + char + content.substring(end);
+                    setContent(newContent);
+                    setTimeout(() => {
+                        textarea.focus();
+                        textarea.setSelectionRange(start + char.length, start + char.length);
+                    }, 0);
+                }
+            };
+
+            const insertFromInput = () => {
+                if (charInput) {
+                    insertChar(charInput);
+                    setCharInput('');
+                }
+            };
+
+            const downloadAsText = () => {
+                const element = document.createElement('a');
+                const file = new Blob([content], { type: 'text/plain' });
+                element.href = URL.createObjectURL(file);
+                element.download = `${currentName || 'ansi-art'}.txt`;
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            };
+
+            const copyToClipboard = () => {
+                navigator.clipboard.writeText(content);
+                alert('Copied to clipboard! 📋');
+            };
+
+            const clearCanvas = () => {
+                if (confirm('Clear the canvas?')) {
+                    setContent('');
+                }
+            };
+
+            return (
+                <div className="curator-container">
+                    <div className="header-section">
+                        <div className="ant-mascot">🐜</div>
+                        <h1 className="header-title">ANSI TERMINAL ART CURATOR</h1>
+                        <p className="header-subtitle">✨ Create • Curate • Share Beautiful ASCII Art</p>
+                        <p className="header-meta">Crafted by AntManThePro</p>
+                    </div>
+
+                    <div className="main-workspace">
+                        <div className="editor-section">
+                            <div className="section-title">📝 Editor Canvas</div>
+                            <textarea
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
+                                placeholder="Type or insert characters to create your ASCII art masterpiece..."
+                                spellCheck="false"
+                            />
+
+                            <div className="char-input-group">
+                                <input
+                                    type="text"
+                                    value={charInput}
+                                    onChange={(e) => setCharInput(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && insertFromInput()}
+                                    placeholder="Paste or type characters..."
+                                />
+                                <button className="success" onClick={insertFromInput}>Insert</button>
+                            </div>
+
+                            <div className="section-title" style={{ marginTop: '20px' }}>⚡ Special Characters</div>
+                            <div className="character-grid">
+                                {specialChars.map(char => (
+                                    <button
+                                        key={char}
+                                        className="char-button"
+                                        onClick={() => insertChar(char)}
+                                        title={`Insert "${char}"`}
+                                    >
+                                        {char}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="control-buttons">
+                                <button className="success" onClick={clearCanvas}>Clear</button>
+                                <button className="success" onClick={copyToClipboard}>Copy</button>
+                                <button className="success" onClick={downloadAsText}>Download</button>
+                            </div>
+
+                            <div className="stats-bar">
+                                <span className="stat">Characters: {content.length}</span>
+                                <span className="stat">Lines: {content.split('\n').length}</span>
+                            </div>
+                        </div>
+
+                        <div className="preview-section">
+                            <div className="section-title">👁️ Live Preview</div>
+                            <div className="preview-box">{content || '(Your art will appear here...)'}</div>
+
+                            <div style={{ marginTop: '20px' }}>
+                                <div className="section-title">💾 Save Artwork</div>
+                                <div className="char-input-group">
+                                    <input
+                                        type="text"
+                                        value={currentName}
+                                        onChange={(e) => setCurrentName(e.target.value)}
+                                        placeholder="Artwork name..."
+                                    />
+                                    <button className="accent" onClick={saveArtwork}>Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="gallery-section">
+                        <div className="section-title">🎨 Saved Artworks Gallery ({artworks.length})</div>
+                        {artworks.length === 0 ? (
+                            <div className="empty-state">No saved artworks yet. Create and save your first masterpiece!</div>
+                        ) : (
+                            <div className="gallery-grid">
+                                {artworks.map(art => (
+                                    <div
+                                        key={art.id}
+                                        className="gallery-item"
+                                        onClick={() => loadArtwork(art.id)}
+                                    >
+                                        <div className="gallery-item-name">{art.name}</div>
+                                        <div className="gallery-item-preview">{art.content}</div>
+                                        <button
+                                            className="gallery-item-remove"
+                                            onClick={(e) => removeArtwork(art.id, e)}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<ANSICurator />, document.getElementById('root'));
+    </script>
+</body>
+</html>

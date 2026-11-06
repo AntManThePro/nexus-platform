@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS Navigation Component</title>
+    <!--
+      REBUILT, not the original file.
+      The original nexus-navigation-component.html was never pasted into
+      this chat, so this was rebuilt from the specs already in the clean
+      NEXUS Platform set:
+        - Hub nav styling and links (nexus-master-hub-clean.html)
+        - Tool links in the Hub and Getting Started pages
+          (/ecosystem/curator.html, playground.html, evolutionary.html,
+           quantumshift.html, terminal-poster.html, ansi-lab.html)
+        - Folder structure in the deployment guide
+          (index.html, getting-started.html, ecosystem/, docs/)
+      No banned branding. Nothing deployed or pushed.
+      To use it: copy the <nav class="nav-bar"> block plus the
+      <style> rules below into any NEXUS page, keeping the same
+      CSS variable names (--primary, --secondary, --accent, --warning).
+    -->
+    <style>
+        :root {
+            --primary: #00ff87;
+            --secondary: #60efff;
+            --accent: #ff0080;
+            --warning: #ffcc00;
+            --bg: #0a0e27;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--bg);
+            color: var(--primary);
+            min-height: 100vh;
+        }
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 14, 39, 0.95);
+            border-bottom: 2px solid var(--primary);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 0 20px rgba(0, 255, 135, 0.2);
+        }
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+            text-decoration: none;
+        }
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-links a:hover {
+            color: var(--warning);
+            border-bottom-color: var(--accent);
+            text-shadow: 0 0 10px rgba(255, 0, 128, 0.5);
+        }
+        .nav-links a.active {
+            color: var(--warning);
+            border-bottom-color: var(--accent);
+        }
+        .nav-tools {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .nav-tools a { font-size: 0.8rem; }
+        main { margin-top: 80px; padding: 40px 30px; }
+        main h1 { font-size: 1.4rem; margin-bottom: 15px; }
+        main p { color: var(--secondary); line-height: 1.6; max-width: 720px; }
+        main code { color: var(--warning); }
+        @media (max-width: 768px) {
+            .nav-bar { flex-direction: column; gap: 10px; padding: 12px 15px; }
+            .nav-links { gap: 12px; flex-wrap: wrap; justify-content: center; }
+            .nav-tools { justify-content: center; }
+            main { margin-top: 140px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Copy this nav block into any NEXUS page -->
+    <nav class="nav-bar">
+        <a class="nav-logo" href="/">⚡ NEXUS</a>
+        <div class="nav-links">
+            <a href="/">Hub</a>
+            <a href="/getting-started.html">Getting Started</a>
+            <span class="nav-tools">
+                <a href="/ecosystem/curator.html">🎨 Curator</a>
+                <a href="/ecosystem/playground.html">🎬 Playground</a>
+                <a href="/ecosystem/evolutionary.html">🧬 Evolutionary</a>
+                <a href="/ecosystem/quantumshift.html">⚛️ QuantumShift</a>
+                <a href="/ecosystem/terminal-poster.html">📺 Poster</a>
+                <a href="/ecosystem/ansi-lab.html">🔬 ANSI Lab</a>
+            </span>
+        </div>
+    </nav>
+
+    <!-- Preview only: this page exists so you can see the nav on its own.
+         The reusable piece is the <nav> block above. -->
+    <main>
+        <h1>NEXUS Navigation Component — Rebuilt</h1>
+        <p>This is a rebuild, not the original file. The original was never
+        found, so this copies the Hub's nav styling and the tool links the
+        Hub and Getting Started pages already use. Add
+        <code>class="active"</code> to the link for the page you are on.</p>
+        <p style="margin-top: 15px;">© 2026 AntManThePro | NEXUS v1.0</p>
+    </main>
+</body>
+</html>

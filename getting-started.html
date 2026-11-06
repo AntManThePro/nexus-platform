@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getting Started with NEXUS | AntManThePro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0f0f2e 100%);
+            color: #00ff87;
+            padding: 20px;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 20px;
+            border-bottom: 2px solid #00ff87;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            background: linear-gradient(90deg, #00ff87, #60efff, #ff0080, #ffcc00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .subtitle { color: #60efff; font-size: 1rem; margin-bottom: 10px; }
+        .byline { color: #ff0080; font-size: 0.9rem; }
+
+        .guide-section {
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid #00ff87;
+            border-radius: 6px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 15px rgba(0, 255, 135, 0.3);
+        }
+
+        .section-title {
+            color: #ffcc00;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ff0080;
+            padding-bottom: 10px;
+        }
+
+        .content {
+            color: #60efff;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .checklist {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .checklist li {
+            padding: 10px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #00ff87;
+        }
+
+        .checklist li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
+        .code-block {
+            background: #000;
+            border: 1px solid #60efff;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            color: #00ff87;
+        }
+
+        .pathway-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .pathway-option {
+            background: rgba(10, 14, 39, 0.8);
+            border: 2px solid #00ff87;
+            border-radius: 6px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .pathway-option:hover {
+            border-color: #ff0080;
+            box-shadow: 0 0 20px rgba(255, 0, 128, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .pathway-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .pathway-name {
+            color: #ffcc00;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .pathway-description {
+            color: #60efff;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            border: 2px solid #ff0080;
+            background: transparent;
+            color: #ff0080;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: rgba(255, 0, 128, 0.15);
+            box-shadow: 0 0 15px rgba(255, 0, 128, 0.5);
+        }
+
+        .step {
+            background: rgba(0, 255, 135, 0.05);
+            border-left: 4px solid #ffcc00;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .step-number {
+            color: #ffcc00;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .step-content {
+            color: #60efff;
+            line-height: 1.6;
+        }
+
+        .tool-ref {
+            color: #ffcc00;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .link-button {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: rgba(0, 255, 135, 0.1);
+            border: 1px solid #00ff87;
+            border-radius: 4px;
+            color: #00ff87;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .link-button:hover {
+            background: rgba(0, 255, 135, 0.2);
+            box-shadow: 0 0 10px rgba(0, 255, 135, 0.4);
+        }
+
+        .faq {
+            margin: 20px 0;
+            border: 1px solid #60efff;
+            border-radius: 4px;
+            padding: 15px;
+        }
+
+        .faq-q {
+            color: #ffcc00;
+            font-weight: bold;
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .faq-q::before {
+            content: '▶ ';
+            transition: transform 0.3s;
+        }
+
+        .faq-q.open::before {
+            transform: rotate(90deg);
+        }
+
+        .faq-a {
+            color: #60efff;
+            display: none;
+            padding-top: 10px;
+            border-top: 1px solid #60efff;
+        }
+
+        .faq-a.open {
+            display: block;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #60efff;
+            font-size: 0.9rem;
+            border-top: 2px solid #00ff87;
+            margin-top: 50px;
+        }
+
+        footer a {
+            color: #ffcc00;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-shadow: 0 0 8px rgba(255, 204, 0, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .guide-section { padding: 20px; }
+            h1 { font-size: 1.8rem; }
+            .pathway-selector { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Getting Started with NEXUS</h1>
+            <p class="subtitle">Complete guide to the algorithmic creativity platform</p>
+            <p class="byline">Built by AntManThePro</p>
+        </header>
+
+        <!-- WHAT IS NEXUS -->
+        <div class="guide-section">
+            <h2 class="section-title">What is NEXUS?</h2>
+            <p class="content">
+                NEXUS is a unified platform that bridges algorithms and aesthetics. It's a collection of tools designed to prove that code and creativity are not opposites—they're partners. Whether you're a designer exploring ASCII art, a developer studying algorithmic visualization, or a curious mind learning computation, NEXUS has something for you.
+            </p>
+            <p class="content">
+                Every tool in NEXUS shares a common philosophy: <strong>algorithms should be beautiful</strong>, and <strong>interaction is the best teacher</strong>.
+            </p>
+        </div>
+
+        <!-- WHICH PATH IS RIGHT FOR YOU -->
+        <div class="guide-section">
+            <h2 class="section-title">Which Path is Right for You?</h2>
+            <div class="pathway-selector">
+                <div class="pathway-option">
+                    <div class="pathway-icon">🎨</div>
+                    <div class="pathway-name">Creator</div>
+                    <p class="pathway-description">You want to make beautiful ASCII art</p>
+                    <button class="btn" onclick="showPathway('creator')">Choose Path</button>
+                </div>
+                <div class="pathway-option">
+                    <div class="pathway-icon">🧬</div>
+                    <div class="pathway-name">Developer</div>
+                    <p class="pathway-description">You want to understand algorithms</p>
+                    <button class="btn" onclick="showPathway('developer')">Choose Path</button>
+                </div>
+                <div class="pathway-option">
+                    <div class="pathway-icon">🔬</div>
+                    <div class="pathway-name">Explorer</div>
+                    <p class="pathway-description">You're curious about everything</p>
+                    <button class="btn" onclick="showPathway('explorer')">Choose Path</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CREATOR PATHWAY -->
+        <div id="pathway-creator" class="guide-section" style="display: none;">
+            <h2 class="section-title">🎨 Creator Pathway</h2>
+            <p class="content">You're interested in creating beautiful ASCII art and learning the creative possibilities of terminal aesthetics.</p>
+
+            <div class="step">
+                <div class="step-number">Step 1: Start Creating</div>
+                <div class="step-content">
+                    Open <span class="tool-ref">ANSI Curator</span> and start creating your first ASCII artwork. Use the character grid to insert special symbols, customize your design, and see a live preview.
+                    <a href="/ecosystem/curator.html" class="link-button">Launch Curator</a>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">Step 2: Animate</div>
+                <div class="step-content">
+                    Once comfortable with basic creation, move to <span class="tool-ref">ANSI Playground</span>. Create keyframe-based animations of your ASCII art, and explore procedural pattern generation.
+                    <a href="/ecosystem/playground.html" class="link-button">Launch Playground</a>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">Step 3: Generate</div>
+                <div class="step-content">
+                    Explore the procedural generators in Playground: fractal patterns, cellular automata, chaos systems, and wave generators. Learn how algorithms can create beauty.
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">Step 4: Share</div>
+                <div class="step-content">
+                    Export your creations as PNG, JSON keyframes, or plain text. Share with the community and contribute to the NEXUS gallery of user-created art.
+                </div>
+            </div>
+        </div>
+
+        <!-- DEVELOPER PATHWAY -->
+        <div id="pathway-developer" class="guide-section" style="display: none;">
+            <h2 class="section-title">🧬 Developer Pathway</h2>
+            <p class="content">You're interested in understanding algorithmic visualization and computational thinking.</p>
+
+            <div class="step">
+                <div class="step-number">Step 1: See Evolution</div>
+                <div class="step-content">
+                    Start with <span class="tool-ref">Evolutionary Algorithm</span> visualizer. Watch genetic algorithms discover optimal solutions in real-time. Adjust population size and mutation rate to see how parameters affect convergence.
+                    <a href="/ecosystem/evolutionary.html" class="link-button">Launch Evolutionary</a>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">Step 2: Explore Algorithms</div>
+                <div class="step-content">
+                    Open <span class="tool-ref">QuantumShift Engine</span> and explore 4 distinct algorithmic approaches:
+                    <ul class="checklist">
+                        <li>Wave Propagation - Fourier harmonics and oscillation</li>
+                        <li>Particle Swarm - Emergent flocking behavior</li>
+                        <li>Neural Activation - Graph-based neuron simulation</li>
+                        <li>Fractal Emergence - Recursive geometric patterns</li>
+                    </ul>
+                    <a href="/ecosystem/quantumshift.html" class="link-button">Launch QuantumShift</a>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">Step 3: Understand the Protocol</div>
+                <div class="step-content">
+                    Move to <span class="tool-ref">ANSI Laboratory</span> to understand how terminal aesthetics work at the protocol level. Study ANSI escape codes and build custom terminal sequences.
+                    <a href="/ecosystem/ansi-lab.html" class="link-button">Launch ANSI Lab</a>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">Step 4: Build Your Own</div>
+                <div class="step-content">
+                    Use NEXUS as inspiration to build your own algorithmic visualization tools. The source code is open—study it, extend it, and contribute back to the ecosystem.
+                </div>
+            </div>
+        </div>
+
+        <!-- EXPLORER PATHWAY -->
+        <div id="pathway-explorer" class="guide-section" style="display: none;">
+            <h2 class="section-title">🔬 Explorer Pathway</h2>
+            <p class="content">You're curious and want to experience all aspects of NEXUS at your own pace.</p>
+
+            <div class="step">
+                <div class="step-number">Start Here: Terminal Poster</div>
+                <div class="step-content">
+                    Get a taste of what NEXUS can do. <span class="tool-ref">Terminal Poster</span> generates stunning ANSI terminal visualizations with live customization.
+                    <a href="/ecosystem/terminal-poster.html" class="link-button">Launch Poster</a>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">Then: Try Each Tool</div>
+                <div class="step-content">
+                    Spend 10 minutes in each tool without pressure. You don't need to understand everything—just play, experiment, and discover what interests you.
+                    <ul class="checklist">
+                        <li><a href="/ecosystem/curator.html" style="color: #ffcc00; text-decoration: underline;">ANSI Curator</a> - Create ASCII art</li>
+                        <li><a href="/ecosystem/playground.html" style="color: #ffcc00; text-decoration: underline;">ANSI Playground</a> - Animate and generate</li>
+                        <li><a href="/ecosystem/evolutionary.html" style="color: #ffcc00; text-decoration: underline;">Evolutionary Algorithm</a> - Watch evolution</li>
+                        <li><a href="/ecosystem/quantumshift.html" style="color: #ffcc00; text-decoration: underline;">QuantumShift Engine</a> - Algorithmic beauty</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">Deep Dive</div>
+                <div class="step-content">
+                    Once you find something that resonates, dive deeper. The NEXUS philosophy isn't about following a strict path—it's about discovering connections between algorithms and aesthetics.
+                </div>
+            </div>
+        </div>
+
+        <!-- NEXUS ECOSYSTEM OVERVIEW -->
+        <div class="guide-section">
+            <h2 class="section-title">The 6 Tools of NEXUS</h2>
+            
+            <div style="margin: 20px 0;">
+                <h3 style="color: #ffcc00; margin: 15px 0 10px;">🎨 ANSI Curator</h3>
+                <p class="content">Professional ASCII art creation and gallery system. Create, save, and manage your ASCII art designs with a full-featured editor.</p>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #ffcc00; margin: 15px 0 10px;">🎬 ANSI Playground</h3>
+                <p class="content">Animation timeline editor with procedural generation. Create keyframe-based ASCII animations and explore algorithmic pattern generators (fractals, cellular automata, chaos, waves).</p>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #ffcc00; margin: 15px 0 10px;">🧬 Evolutionary Algorithm</h3>
+                <p class="content">Live genetic algorithm visualizer. Watch organisms evolve toward fitness targets with interactive controls for population size, mutation rate, and target behavior.</p>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #ffcc00; margin: 15px 0 10px;">⚛️ QuantumShift Engine</h3>
+                <p class="content">4 algorithmic visualizers: wave propagation, particle swarms, neural networks, and fractal generation. Each demonstrates different computational approaches to creating beauty.</p>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #ffcc00; margin: 15px 0 10px;">📺 Terminal Poster</h3>
+                <p class="content">ANSI terminal poster generation with live rendering. Customize fonts, colors, and complexity, then export high-resolution PNGs.</p>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #ffcc00; margin: 15px 0 10px;">🔬 ANSI Laboratory</h3>
+                <p class="content">Terminal escape code editor. Work at the protocol level to understand and build custom ANSI sequences. Export as standalone HTML applications.</p>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="guide-section">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+
+            <div class="faq">
+                <div class="faq-q" onclick="toggleFAQ(this)">Do I need any technical skills to use NEXUS?</div>
+                <div class="faq-a">Not necessarily. Creator and Explorer pathways are designed for everyone. Developer pathway requires programming knowledge, but reading the code is optional—just running the tools teaches you something.</div>
+            </div>
+
+            <div class="faq">
+                <div class="faq-q" onclick="toggleFAQ(this)">Can I export my creations?</div>
+                <div class="faq-a">Yes! ANSI Curator exports .txt files. ANSI Playground exports ANSI sequences, JSON keyframes, and plain text. Terminal Poster exports PNG images. Export formats depend on the tool.</div>
+            </div>
+
+            <div class="faq">
+                <div class="faq-q" onclick="toggleFAQ(this)">Is NEXUS free?</div>
+                <div class="faq-a">Yes. All NEXUS tools are free and open source under the NEXUS License. You can use, modify, and redistribute them freely. Just give credit to AntManThePro.</div>
+            </div>
+
+            <div class="faq">
+                <div class="faq-q" onclick="toggleFAQ(this)">Can I use NEXUS tools in my project?</div>
+                <div class="faq-a">Absolutely. You can fork, modify, and use NEXUS tools in commercial or open-source projects. Attribution required. See NEXUS-LICENSE.md for full terms.</div>
+            </div>
+
+            <div class="faq">
+                <div class="faq-q" onclick="toggleFAQ(this)">Do I need internet?</div>
+                <div class="faq-a">No. All NEXUS tools work offline. Everything runs in your browser using only standard web APIs. Download the HTML files and open them directly—no server required.</div>
+            </div>
+
+            <div class="faq">
+                <div class="faq-q" onclick="toggleFAQ(this)">What's the story behind NEXUS?</div>
+                <div class="faq-a">NEXUS was built to prove that algorithms and aesthetics aren't separate—they're the same thing. Terminal aesthetics deserve first-class treatment, and procedural beauty is real beauty.</div>
+            </div>
+        </div>
+
+        <!-- NEXT STEPS -->
+        <div class="guide-section">
+            <h2 class="section-title">Ready to Begin?</h2>
+            <p class="content" style="margin-bottom: 30px;">
+                Choose your pathway above and follow the steps. There's no "wrong" way to explore NEXUS. The best path is the one that captures your curiosity.
+            </p>
+            <a href="/" style="display: inline-block; padding: 15px 40px; border: 2px solid #00ff87; background: rgba(0, 255, 135, 0.1); color: #00ff87; text-decoration: none; border-radius: 4px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Return to Hub</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 AntManThePro | NEXUS Platform</p>
+        <p style="margin-top: 10px;">
+            <a href="docs/NEXUS-LICENSE.md">License</a> • 
+            <a href="docs/NEXUS-COPYRIGHT.md">Copyright</a> • 
+            <a href="docs/README-NEXUS.md">Documentation</a>
+        </p>
+    </footer>
+
+    <script>
+        function showPathway(pathway) {
+            // Hide all pathways
+            document.getElementById('pathway-creator').style.display = 'none';
+            document.getElementById('pathway-developer').style.display = 'none';
+            document.getElementById('pathway-explorer').style.display = 'none';
+            
+            // Show selected pathway
+            document.getElementById('pathway-' + pathway).style.display = 'block';
+            
+            // Scroll to it
+            document.getElementById('pathway-' + pathway).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function toggleFAQ(element) {
+            element.classList.toggle('open');
+            const answer = element.nextElementSibling;
+            answer.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuantumShift Engine — NEXUS | AntManThePro</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --primary: #00ff87;
+    --secondary: #60efff;
+    --accent: #ff0080;
+    --warning: #ffcc00;
+    --bg: #0a0e27;
+    --darker: #050610;
+  }
+  body {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, var(--bg) 0%, #1a1a3e 50%, var(--darker) 100%);
+    color: var(--primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+  .nav-bar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(10, 14, 39, 0.95);
+    border-bottom: 2px solid var(--primary);
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 0 20px rgba(0, 255, 135, 0.2);
+  }
+  .nav-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 2px;
+  }
+  .nav-links { display: flex; gap: 25px; align-items: center; }
+  .nav-links a {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid transparent;
+  }
+  .nav-links a:hover { color: var(--warning); border-bottom-color: var(--accent); }
+  main { margin-top: 80px; }
+  .wrap { max-width: 1152px; margin: 0 auto; padding: 16px 16px 32px; }
+  @media (min-width: 768px) { .wrap { padding: 32px; } }
+  header { margin-bottom: 32px; }
+  h1 { font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 900; color: var(--primary); margin-bottom: 8px; }
+  .subtitle { color: var(--secondary); font-size: 1rem; }
+  @media (min-width: 768px) { .subtitle { font-size: 1.1rem; } }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+  @media (min-width: 1024px) { .grid { grid-template-columns: 1fr 3fr; } }
+  .controls { display: flex; flex-direction: column; gap: 16px; }
+  .panel { border-radius: 8px; padding: 16px; border: 2px solid var(--primary); background: rgba(10, 14, 39, 0.8); }
+  .panel.mode { border-color: var(--primary); }
+  .panel.params { border-color: var(--secondary); }
+  .panel.actions { border-color: var(--accent); }
+  .panel h3 { font-weight: bold; margin-bottom: 12px; }
+  .panel.mode h3 { color: var(--primary); }
+  .panel.params h3 { color: var(--secondary); }
+  .panel.actions h3 { color: var(--accent); }
+  .mode-btn {
+    display: block; width: 100%;
+    padding: 8px 12px; margin-bottom: 8px;
+    border-radius: 4px; font-family: 'Courier New', monospace;
+    font-weight: 600; font-size: 0.85rem; cursor: pointer;
+    background: transparent; color: var(--secondary);
+    border: 1px solid rgba(255, 0, 128, 0.27);
+    opacity: 0.6; transition: all 0.2s;
+  }
+  .mode-btn.active {
+    background: var(--primary); color: var(--bg);
+    border-color: var(--primary); opacity: 1;
+    box-shadow: 0 4px 12px rgba(0, 255, 135, 0.35);
+  }
+  .mode-desc { font-size: 0.75rem; color: var(--secondary); margin-top: 12px; }
+  .param { margin-bottom: 12px; }
+  .param label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--warning); margin-bottom: 4px; }
+  .param input[type="range"] { width: 100%; accent-color: var(--primary); cursor: pointer; }
+  .action-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 10px 12px; margin-bottom: 8px;
+    border-radius: 4px; font-family: 'Courier New', monospace;
+    font-weight: bold; font-size: 0.9rem; cursor: pointer; border: none;
+  }
+  .action-btn:last-child { margin-bottom: 0; }
+  .btn-play { background: var(--primary); color: var(--bg); }
+  .btn-reset { background: transparent; border: 2px solid var(--secondary) !important; color: var(--secondary); }
+  .btn-download { background: var(--warning); color: var(--bg); }
+  .btn-sound { background: var(--accent); color: #fff; }
+  .btn-sound.off { opacity: 0.5; }
+  .canvas-wrap {
+    border-radius: 8px; overflow: hidden;
+    border: 3px solid var(--accent);
+    box-shadow: 0 0 40px rgba(0, 255, 135, 0.27);
+    background: var(--bg);
+  }
+  canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--bg); }
+  .canvas-note { font-size: 0.75rem; color: var(--secondary); margin-top: 8px; }
+  footer {
+    margin-top: 32px; padding-top: 24px;
+    border-top: 2px solid var(--secondary);
+    text-align: center;
+  }
+  footer p { color: var(--secondary); font-size: 0.85rem; }
+  footer a { color: var(--warning); text-decoration: none; }
+  footer a:hover { color: var(--primary); }
+  @media (max-width: 768px) {
+    .nav-bar { flex-direction: column; gap: 10px; padding: 12px 15px; }
+    .nav-links { gap: 12px; flex-wrap: wrap; justify-content: center; }
+    main { margin-top: 110px; }
+  }
+</style>
+</head>
+<body>
+<nav class="nav-bar">
+  <div class="nav-logo">&#9889; NEXUS</div>
+  <div class="nav-links">
+    <a href="../index.html">&larr; Hub</a>
+    <a href="../getting-started.html">Getting Started</a>
+    <a href="../index.html#tools">Tools</a>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+    <header>
+      <h1>&#9889; QuantumShift</h1>
+      <p class="subtitle">Real-time algorithmic art engine &bull; Particle physics &bull; Neural networks &bull; Fractals</p>
+    </header>
+
+    <div class="grid">
+      <div class="controls">
+        <section class="panel mode" aria-label="Render mode">
+          <h3>Render Mode</h3>
+          <div id="modeButtons"></div>
+          <p class="mode-desc" id="modeDescription"></p>
+        </section>
+
+        <section class="panel params" aria-label="Parameters">
+          <h3>Parameters</h3>
+          <div class="param">
+            <label for="speedRange" id="speedLabel">Speed: 1.0x</label>
+            <input type="range" id="speedRange" min="0.1" max="3" step="0.1" value="1">
+          </div>
+          <div class="param">
+            <label for="intensityRange" id="intensityLabel">Intensity: 70%</label>
+            <input type="range" id="intensityRange" min="0" max="1" step="0.1" value="0.7">
+          </div>
+          <div class="param" id="particleParam">
+            <label for="particleRange" id="particleLabel">Particles: 200</label>
+            <input type="range" id="particleRange" min="50" max="500" step="50" value="200">
+          </div>
+        </section>
+
+        <section class="panel actions" aria-label="Control">
+          <h3>Control</h3>
+          <button type="button" class="action-btn btn-play" id="playPauseBtn">&#9208; Pause</button>
+          <button type="button" class="action-btn btn-reset" id="resetBtn">&#8635; Reset</button>
+          <button type="button" class="action-btn btn-download" id="downloadBtn">&#11015; Frame</button>
+          <button type="button" class="action-btn btn-sound off" id="soundBtn">&#128263; Audio Off</button>
+        </section>
+      </div>
+
+      <div>
+        <div class="canvas-wrap">
+          <canvas id="quantumCanvas"></canvas>
+        </div>
+        <p class="canvas-note">&#127912; Computational art powered by Canvas API &bull; Real-time algorithmic rendering &bull; 60 FPS optimization</p>
+      </div>
+    </div>
+
+    <footer>
+      <p>QuantumShift v3.2 &bull; AntManThePro Portfolio &bull; Next-gen algorithmic visualization engine</p>
+      <p style="margin-top: 10px;"><a href="../index.html">&larr; Return to NEXUS Hub</a></p>
+    </footer>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var nexusColors = {
+    primary: '#00ff87',
+    secondary: '#60efff',
+    accent: '#ff0080',
+    warning: '#ffcc00',
+    bg: '#0a0e27'
+  };
+
+  var modes = {
+    wave: { name: 'Wave Propagation', description: 'Fourier-based harmonic oscillation' },
+    particle: { name: 'Particle Swarm', description: 'Emergent flocking behavior' },
+    neural: { name: 'Neural Activation', description: 'Graph-based neuron firing' },
+    fractal: { name: 'Fractal Emergence', description: 'Recursive geometric pattern' }
+  };
+
+  var isRunning = true;
+  var mode = 'wave';
+  var speed = 1;
+  var intensity = 0.7;
+  var sound = false;
+  var particleCount = 200;
+
+  var canvas = document.getElementById('quantumCanvas');
+  var ctx = canvas.getContext('2d');
+  var animationRef = null;
+
+  var audioContext = null;
+
+  function initAudio() {
+    if (audioContext) return;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    audioContext = new AC();
+  }
+
+  function playTone(frequency, duration) {
+    if (duration === undefined) duration = 0.1;
+    if (!sound || !audioContext) return;
+    try {
+      var osc = audioContext.createOscillator();
+      var gain = audioContext.createGain();
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+      osc.frequency.value = frequency;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+      osc.start(audioContext.currentTime);
+      osc.stop(audioContext.currentTime + duration);
+    } catch (e) {
+      console.log('Audio error:', e);
+    }
+  }
+
+  function renderWave(ctx, width, height, time) {
+    ctx.fillStyle = nexusColors.bg;
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.strokeStyle = nexusColors.primary;
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.8;
+
+    var waves = 5;
+    for (var w = 0; w < waves; w++) {
+      ctx.beginPath();
+      for (var x = 0; x < width; x += 2) {
+        var y = height / 2 +
+          Math.sin((x * 0.01 + time * 0.05 * speed + w * 0.5) * Math.PI) * 100 * intensity;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = 'hsla(' + (120 + w * 30) + ', 100%, 50%, ' + (0.6 - w * 0.1) + ')';
+      ctx.stroke();
+    }
+
+    // Fourier circles
+    ctx.fillStyle = nexusColors.secondary;
+    ctx.globalAlpha = 0.4;
+    var circles = 8;
+    for (var i = 0; i < circles; i++) {
+      var angle = (time * 0.02 * speed + (i / circles) * Math.PI * 2) % (Math.PI * 2);
+      var radius = 50 + i * 15;
+      var cx = width / 2 + Math.cos(angle) * radius;
+      var cy = height / 2 + Math.sin(angle) * radius;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 8 + i * 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+    playTone(220 + Math.sin(time * 0.01) * 100, 0.05);
+  }
+
+  function renderParticles(ctx, width, height, time) {
+    ctx.fillStyle = nexusColors.bg;
+    ctx.fillRect(0, 0, width, height);
+
+    var particles = [];
+    for (var i = 0; i < particleCount; i++) {
+      var angle = (i / particleCount) * Math.PI * 2 + time * 0.01 * speed;
+      var distance = 100 + Math.sin(time * 0.005 + i * 0.1) * 50 * intensity;
+      var x = width / 2 + Math.cos(angle) * distance;
+      var y = height / 2 + Math.sin(angle) * distance;
+      particles.push({ x: x, y: y, i: i });
+    }
+
+    // Draw connections
+    ctx.strokeStyle = nexusColors.secondary;
+    ctx.globalAlpha = 0.2;
+    ctx.lineWidth = 1;
+    for (var a = 0; a < particles.length; a++) {
+      for (var j = a + 1; j < Math.min(a + 4, particles.length); j++) {
+        var dx = particles[j].x - particles[a].x;
+        var dy = particles[j].y - particles[a].y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150) {
+          ctx.beginPath();
+          ctx.moveTo(particles[a].x, particles[a].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw particles
+    ctx.globalAlpha = 1;
+    particles.forEach(function (p) {
+      var hue = (p.i / particleCount * 360 + time * 0.1) % 360;
+      ctx.fillStyle = 'hsl(' + hue + ', 100%, 50%)';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3 + Math.sin(time * 0.02 + p.i) * 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = nexusColors.primary;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    playTone(440 + Math.random() * 100, 0.05);
+  }
+
+  function renderNeural(ctx, width, height, time) {
+    ctx.fillStyle = nexusColors.bg;
+    ctx.fillRect(0, 0, width, height);
+
+    var neurons = 12;
+    var layers = 4;
+    var positions = [];
+
+    // Create neural network layout
+    for (var layer = 0; layer < layers; layer++) {
+      for (var neuron = 0; neuron < neurons; neuron++) {
+        var x = (layer + 1) * (width / (layers + 1));
+        var y = (neuron + 1) * (height / (neurons + 1));
+        positions.push({
+          x: x,
+          y: y,
+          layer: layer,
+          neuron: neuron,
+          activity: Math.sin(time * 0.01 + layer + neuron) * 0.5 + 0.5
+        });
+      }
+    }
+
+    // Draw synapses
+    ctx.globalAlpha = 0.15;
+    ctx.strokeStyle = nexusColors.secondary;
+    ctx.lineWidth = 1;
+    for (var i = 0; i < positions.length - neurons; i++) {
+      var p1 = positions[i];
+      var p2 = positions[i + neurons];
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+    }
+
+    // Draw neurons
+    ctx.globalAlpha = 1;
+    positions.forEach(function (p) {
+      var size = 4 + p.activity * 6 * intensity;
+      var hue = (p.layer * 90 + p.neuron * 30 + time * 0.1) % 360;
+
+      ctx.fillStyle = 'hsl(' + hue + ', 100%, ' + (40 + p.activity * 40) + '%)';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (p.activity > 0.7) {
+        ctx.strokeStyle = nexusColors.accent;
+        ctx.globalAlpha = 0.6;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, size + 3, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+    });
+
+    playTone(200 + positions.filter(function (p) { return p.activity > 0.7; }).length * 40, 0.05);
+  }
+
+  function renderFractal(ctx, width, height, time) {
+    ctx.fillStyle = nexusColors.bg;
+    ctx.fillRect(0, 0, width, height);
+
+    var drawBranch = function (x, y, angle, depth, scale) {
+      if (depth === 0) return;
+
+      var length = 100 * scale * intensity;
+      var nextX = x + Math.cos(angle) * length;
+      var nextY = y + Math.sin(angle) * length;
+
+      var hue = (angle * 100 + time * 0.05 + depth * 30) % 360;
+      ctx.strokeStyle = 'hsl(' + hue + ', 100%, 50%)';
+      ctx.lineWidth = depth * 1.5;
+      ctx.globalAlpha = 0.8;
+
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(nextX, nextY);
+      ctx.stroke();
+
+      var angleOffset = 0.5 + Math.sin(time * 0.01) * 0.2;
+      drawBranch(nextX, nextY, angle - angleOffset, depth - 1, scale * 0.7);
+      drawBranch(nextX, nextY, angle + angleOffset, depth - 1, scale * 0.7);
+    };
+
+    ctx.globalAlpha = 1;
+    var startAngle = Math.PI / 2 + Math.sin(time * 0.005) * 0.3;
+    drawBranch(width / 2, height * 0.9, startAngle, 10, 1);
+
+    playTone(330 + Math.sin(time * 0.01) * 100, 0.05);
+  }
+
+  function sizeCanvas() {
+    var dpr = window.devicePixelRatio || 1;
+    var w = canvas.clientWidth;
+    var h = canvas.clientHeight;
+    if (!w || !h) return;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+  }
+
+  function renderFrame() {
+    if (!canvas.clientWidth || !canvas.clientHeight) return;
+    var dpr = window.devicePixelRatio || 1;
+    // Match the source DPR scaling, reset every frame so the
+    // transform never accumulates. Logical size is the CSS size, so the
+    // renderers draw in the same coordinate space at any DPR.
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var width = canvas.clientWidth;
+    var height = canvas.clientHeight;
+    var time = Date.now() / 1000;
+    if (mode === 'wave') renderWave(ctx, width, height, time);
+    else if (mode === 'particle') renderParticles(ctx, width, height, time);
+    else if (mode === 'neural') renderNeural(ctx, width, height, time);
+    else if (mode === 'fractal') renderFractal(ctx, width, height, time);
+  }
+
+  function animate() {
+    renderFrame();
+    if (isRunning) {
+      animationRef = requestAnimationFrame(animate);
+    } else {
+      animationRef = null;
+    }
+  }
+
+  function startLoop() {
+    if (animationRef) cancelAnimationFrame(animationRef);
+    animationRef = requestAnimationFrame(animate);
+  }
+
+  function stopLoop() {
+    if (animationRef) cancelAnimationFrame(animationRef);
+    animationRef = null;
+  }
+
+  // Render one frame when a control changes while paused, matching the
+  // Source behaviour: animate() runs once on a dependency change.
+  function renderOnceIfPaused() {
+    if (!isRunning) renderFrame();
+  }
+
+  // --- Controls ---
+  var modeButtonsEl = document.getElementById('modeButtons');
+  var modeDescriptionEl = document.getElementById('modeDescription');
+  var particleParamEl = document.getElementById('particleParam');
+
+  Object.keys(modes).forEach(function (key) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'mode-btn';
+    btn.textContent = modes[key].name;
+    btn.setAttribute('data-mode', key);
+    btn.addEventListener('click', function () {
+      mode = key;
+      syncModeUI();
+      renderOnceIfPaused();
+    });
+    modeButtonsEl.appendChild(btn);
+  });
+
+  function syncModeUI() {
+    var buttons = modeButtonsEl.querySelectorAll('.mode-btn');
+    buttons.forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
+    });
+    modeDescriptionEl.textContent = modes[mode].description;
+    particleParamEl.style.display = mode === 'particle' ? '' : 'none';
+  }
+
+  var speedRange = document.getElementById('speedRange');
+  var intensityRange = document.getElementById('intensityRange');
+  var particleRange = document.getElementById('particleRange');
+  var speedLabel = document.getElementById('speedLabel');
+  var intensityLabel = document.getElementById('intensityLabel');
+  var particleLabel = document.getElementById('particleLabel');
+
+  speedRange.addEventListener('input', function () {
+    speed = parseFloat(speedRange.value);
+    speedLabel.textContent = 'Speed: ' + speed.toFixed(1) + 'x';
+    renderOnceIfPaused();
+  });
+  intensityRange.addEventListener('input', function () {
+    intensity = parseFloat(intensityRange.value);
+    intensityLabel.textContent = 'Intensity: ' + Math.round(intensity * 100) + '%';
+    renderOnceIfPaused();
+  });
+  particleRange.addEventListener('input', function () {
+    particleCount = parseInt(particleRange.value, 10);
+    particleLabel.textContent = 'Particles: ' + particleCount;
+    renderOnceIfPaused();
+  });
+
+  var playPauseBtn = document.getElementById('playPauseBtn');
+  function syncPlayPauseUI() {
+    playPauseBtn.innerHTML = isRunning ? '&#9208; Pause' : '&#9654; Play';
+  }
+  playPauseBtn.addEventListener('click', function () {
+    isRunning = !isRunning;
+    syncPlayPauseUI();
+    if (isRunning) {
+      startLoop();
+    } else {
+      stopLoop();
+      renderFrame();
+    }
+  });
+
+  // Reset in the source only sets isRunning to true (it does not
+  // reset speed, intensity, mode, or time). Preserved exactly: resume.
+  document.getElementById('resetBtn').addEventListener('click', function () {
+    if (!isRunning) {
+      isRunning = true;
+      syncPlayPauseUI();
+      startLoop();
+    }
+  });
+
+  document.getElementById('downloadBtn').addEventListener('click', function () {
+    var link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = 'quantumshift-' + Date.now() + '.png';
+    link.click();
+  });
+
+  var soundBtn = document.getElementById('soundBtn');
+  function syncSoundUI() {
+    soundBtn.innerHTML = sound ? '&#128266; Audio On' : '&#128263; Audio Off';
+    soundBtn.classList.toggle('off', !sound);
+  }
+  soundBtn.addEventListener('click', function () {
+    sound = !sound;
+    if (sound) {
+      initAudio();
+      if (audioContext && audioContext.state === 'suspended') audioContext.resume();
+    }
+    syncSoundUI();
+    renderOnceIfPaused();
+  });
+
+  window.addEventListener('resize', function () {
+    sizeCanvas();
+    renderFrame();
+  });
+
+  // Init
+  syncModeUI();
+  syncPlayPauseUI();
+  syncSoundUI();
+  sizeCanvas();
+  if (sound) initAudio();
+  animate();
+})();
+</script>
+</body>
+</html>

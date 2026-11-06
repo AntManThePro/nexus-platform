@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS - Algorithmic Creativity Platform | AntManThePro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #00ff87;
+            --secondary: #60efff;
+            --accent: #ff0080;
+            --warning: #ffcc00;
+            --dark: #0a0e27;
+            --darker: #050610;
+            --text: #00ff87;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, var(--dark) 0%, #1a1a3e 50%, var(--darker) 100%);
+            color: var(--primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 14, 39, 0.95);
+            border-bottom: 2px solid var(--primary);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 0 20px rgba(0, 255, 135, 0.2);
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-links a:hover {
+            color: var(--warning);
+            border-bottom-color: var(--accent);
+            text-shadow: 0 0 10px rgba(255, 0, 128, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .nav-bar { flex-direction: column; gap: 10px; }
+            .nav-links { gap: 12px; flex-wrap: wrap; justify-content: center; }
+        }
+
+        main { margin-top: 80px; }
+
+        .hero {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px 20px;
+            background: radial-gradient(ellipse at center, rgba(0, 255, 135, 0.1) 0%, transparent 70%);
+            border-bottom: 2px solid var(--primary);
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .hero-subtitle {
+            color: var(--secondary);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent), var(--warning), var(--primary));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+            letter-spacing: 3px;
+            animation: gradientShift 4s linear infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+            100% { background-position: 0% center; }
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            max-width: 700px;
+            margin: 30px 0 50px;
+            line-height: 1.8;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: rgba(0, 255, 135, 0.15);
+            box-shadow: 0 0 20px rgba(0, 255, 135, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .btn.accent {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn.accent:hover {
+            background: rgba(255, 0, 128, 0.15);
+            box-shadow: 0 0 20px rgba(255, 0, 128, 0.5);
+        }
+
+        .hero-byline {
+            color: var(--accent);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .section {
+            padding: 80px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            text-align: center;
+            margin-bottom: 60px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .tool-card {
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            padding: 30px;
+            transition: all 0.3s;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 135, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 135, 0.2), transparent);
+            transition: left 0.5s;
+            pointer-events: none;
+        }
+
+        .tool-card:hover::before {
+            left: 100%;
+        }
+
+        .tool-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-10px);
+            box-shadow: 0 0 25px rgba(255, 0, 128, 0.4);
+        }
+
+        .tool-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .tool-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--warning);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tool-description {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .tool-features {
+            list-style: none;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            color: var(--primary);
+        }
+
+        .tool-features li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .tool-features li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        .tool-link {
+            display: inline-block;
+            color: var(--warning);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tool-link:hover {
+            color: var(--primary);
+            border-bottom-color: var(--warning);
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+
+        .ecosystem-map {
+            background: rgba(10, 14, 39, 0.8);
+            border: 2px solid var(--secondary);
+            border-radius: 6px;
+            padding: 40px;
+            margin: 60px 0;
+            text-align: center;
+        }
+
+        .pathways {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 60px 0;
+        }
+
+        .pathway {
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .pathway-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .pathway-title {
+            font-size: 1.3rem;
+            color: var(--warning);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .pathway-description {
+            color: var(--secondary);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .pathway-steps {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .pathway-steps li {
+            color: var(--primary);
+            padding: 8px 0;
+            font-size: 0.9rem;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .pathway-steps li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .stats-section {
+            background: rgba(0, 255, 135, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            padding: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            text-align: center;
+            margin: 60px 0;
+        }
+
+        .stat {
+            padding: 20px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--warning);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: var(--secondary);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .philosophy {
+            background: linear-gradient(135deg, rgba(0, 255, 135, 0.1), rgba(255, 0, 128, 0.1));
+            border: 2px solid var(--secondary);
+            border-radius: 6px;
+            padding: 50px;
+            text-align: center;
+            margin: 60px 0;
+        }
+
+        .philosophy h3 {
+            font-size: 1.5rem;
+            color: var(--warning);
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .philosophy-point {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+
+        footer {
+            background: rgba(10, 14, 39, 0.95);
+            border-top: 2px solid var(--primary);
+            padding: 40px;
+            text-align: center;
+            color: var(--secondary);
+            margin-top: 80px;
+        }
+
+        footer a {
+            color: var(--warning);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        footer a:hover {
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 255, 135, 0.5);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section { padding: 50px 20px; }
+            .nav-bar { padding: 12px 15px; }
+            .hero { padding: 40px 20px; min-height: 70vh; }
+            .tools-grid { gap: 20px; }
+            .tool-card { padding: 20px; }
+            .cta-buttons { gap: 12px; }
+            .btn { padding: 12px 25px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <div class="nav-logo">⚡ NEXUS</div>
+        <div class="nav-links">
+            <a href="#tools">Tools</a>
+            <a href="#pathways">Getting Started</a>
+            <a href="#philosophy">Philosophy</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- HERO SECTION -->
+        <section class="hero">
+            <p class="hero-subtitle">Engineered by AntManThePro</p>
+            <h1>NEXUS</h1>
+            <p class="hero-description">
+                Where algorithms meet aesthetics.<br>
+                A unified platform for algorithmic creativity, terminal design, and creative computation.
+            </p>
+            <div class="cta-buttons">
+                <a href="#tools" class="btn accent">Explore Tools</a>
+                <a href="#pathways" class="btn">Get Started</a>
+            </div>
+            <p class="hero-byline">NEXUS License v1.0 | Open Source | Production Ready</p>
+        </section>
+
+        <!-- TOOLS SECTION -->
+        <section class="section" id="tools">
+            <h2 class="section-title">🛠️ The NEXUS Toolkit</h2>
+            <div class="tools-grid">
+                <!-- Tool 1: ANSI Curator -->
+                <div class="tool-card">
+                    <div class="tool-icon">🎨</div>
+                    <div class="tool-name">ANSI Curator</div>
+                    <p class="tool-description">Professional ASCII art creation and gallery system.</p>
+                    <ul class="tool-features">
+                        <li>Character insertion grid</li>
+                        <li>Real-time preview</li>
+                        <li>Persistent gallery</li>
+                        <li>Export to .txt</li>
+                    </ul>
+                    <a href="/ecosystem/curator.html" class="tool-link">Launch Curator →</a>
+                </div>
+
+                <!-- Tool 2: ANSI Playground -->
+                <div class="tool-card">
+                    <div class="tool-icon">🎬</div>
+                    <div class="tool-name">ANSI Playground</div>
+                    <p class="tool-description">Animation timeline editor with procedural generation.</p>
+                    <ul class="tool-features">
+                        <li>Keyframe animation</li>
+                        <li>Procedural generators</li>
+                        <li>Multi-format export</li>
+                        <li>Real-time playback</li>
+                    </ul>
+                    <a href="/ecosystem/playground.html" class="tool-link">Launch Playground →</a>
+                </div>
+
+                <!-- Tool 3: Evolutionary Algorithm -->
+                <div class="tool-card">
+                    <div class="tool-icon">🧬</div>
+                    <div class="tool-name">Evolutionary Algorithm</div>
+                    <p class="tool-description">Live genetic algorithm with population evolution.</p>
+                    <ul class="tool-features">
+                        <li>Real-time fitness tracking</li>
+                        <li>Interactive controls</li>
+                        <li>Three target modes</li>
+                        <li>Statistics dashboard</li>
+                    </ul>
+                    <a href="/ecosystem/evolutionary.html" class="tool-link">Launch Evolve →</a>
+                </div>
+
+                <!-- Tool 4: QuantumShift Engine -->
+                <div class="tool-card">
+                    <div class="tool-icon">⚛️</div>
+                    <div class="tool-name">QuantumShift Engine</div>
+                    <p class="tool-description">4 algorithmic visualizers with real-time rendering.</p>
+                    <ul class="tool-features">
+                        <li>Wave propagation</li>
+                        <li>Particle swarms</li>
+                        <li>Neural activation</li>
+                        <li>Fractal patterns</li>
+                    </ul>
+                    <a href="/ecosystem/quantumshift.html" class="tool-link">Launch Engine →</a>
+                </div>
+
+                <!-- Tool 5: Terminal Poster -->
+                <div class="tool-card">
+                    <div class="tool-icon">📺</div>
+                    <div class="tool-name">Terminal Poster</div>
+                    <p class="tool-description">ANSI terminal poster generation with live rendering.</p>
+                    <ul class="tool-features">
+                        <li>Real-time customization</li>
+                        <li>Multiple color schemes</li>
+                        <li>PNG export</li>
+                        <li>High-DPI support</li>
+                    </ul>
+                    <a href="/ecosystem/terminal-poster.html" class="tool-link">Launch Poster →</a>
+                </div>
+
+                <!-- Tool 6: ANSI Laboratory -->
+                <div class="tool-card">
+                    <div class="tool-icon">🔬</div>
+                    <div class="tool-name">ANSI Laboratory</div>
+                    <p class="tool-description">Terminal escape code editor with live rendering.</p>
+                    <ul class="tool-features">
+                        <li>Protocol-level editing</li>
+                        <li>Escape code snippets</li>
+                        <li>Export standalone HTML</li>
+                        <li>Real-time preview</li>
+                    </ul>
+                    <a href="/ecosystem/ansi-lab.html" class="tool-link">Launch Lab →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ECOSYSTEM MAP -->
+        <section class="section">
+            <div class="ecosystem-map">
+                <h3 style="color: var(--primary); font-size: 1.3rem; margin-bottom: 20px; text-transform: uppercase;">How NEXUS Works</h3>
+                <p style="color: var(--secondary); margin-bottom: 30px;">
+                    NEXUS is a progression from <strong>Create</strong> → <strong>Animate</strong> → <strong>Understand</strong> → <strong>Generate</strong>
+                </p>
+                <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; align-items: center;">
+                    <div style="color: var(--warning); font-weight: bold;">🎨 Create</div>
+                    <div style="color: var(--primary);">→</div>
+                    <div style="color: var(--warning); font-weight: bold;">🎬 Animate</div>
+                    <div style="color: var(--primary);">→</div>
+                    <div style="color: var(--warning); font-weight: bold;">🧬 Understand</div>
+                    <div style="color: var(--primary);">→</div>
+                    <div style="color: var(--warning); font-weight: bold;">✨ Generate</div>
+                </div>
+                <p style="color: var(--secondary); margin-top: 30px; font-size: 0.9rem;">
+                    Each tool feeds into the next, creating a complete creative computation ecosystem.
+                </p>
+            </div>
+        </section>
+
+        <!-- PATHWAYS SECTION -->
+        <section class="section" id="pathways">
+            <h2 class="section-title">🚀 Getting Started</h2>
+            <div class="pathways">
+                <div class="pathway">
+                    <div class="pathway-icon">🎨</div>
+                    <div class="pathway-title">Creator Journey</div>
+                    <p class="pathway-description">For designers and artists exploring ASCII creativity</p>
+                    <ul class="pathway-steps">
+                        <li>Start with ANSI Curator</li>
+                        <li>Create your first ASCII art</li>
+                        <li>Move to Playground</li>
+                        <li>Animate and export</li>
+                    </ul>
+                </div>
+
+                <div class="pathway">
+                    <div class="pathway-icon">🧬</div>
+                    <div class="pathway-title">Developer Journey</div>
+                    <p class="pathway-description">For engineers interested in algorithmic visualization</p>
+                    <ul class="pathway-steps">
+                        <li>Start with Evolutionary Algorithm</li>
+                        <li>Explore QuantumShift Engine</li>
+                        <li>Study ANSI Laboratory</li>
+                        <li>Build your own tools</li>
+                    </ul>
+                </div>
+
+                <div class="pathway">
+                    <div class="pathway-icon">🔬</div>
+                    <div class="pathway-title">Explorer Journey</div>
+                    <p class="pathway-description">For curious minds learning computation and aesthetics</p>
+                    <ul class="pathway-steps">
+                        <li>Try Terminal Poster</li>
+                        <li>Experiment with all tools</li>
+                        <li>Understand the philosophy</li>
+                        <li>Contribute to NEXUS</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- STATS SECTION -->
+        <section class="section">
+            <div class="stats-section">
+                <div class="stat">
+                    <div class="stat-number">6</div>
+                    <div class="stat-label">Production Tools</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Dependencies</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Browser Native</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">∞</div>
+                    <div class="stat-label">Possibilities</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PHILOSOPHY SECTION -->
+        <section class="section" id="philosophy">
+            <div class="philosophy">
+                <h3>The NEXUS Philosophy</h3>
+                <p class="philosophy-point">
+                    <strong>Algorithms should be beautiful.</strong><br>
+                    Code and creativity are not opposites—they're partners.
+                </p>
+                <p class="philosophy-point">
+                    <strong>Terminal aesthetics deserve first-class treatment.</strong><br>
+                    ANSI art is legitimate. Proof: we built an entire platform around it.
+                </p>
+                <p class="philosophy-point">
+                    <strong>Interaction is the best teacher.</strong><br>
+                    See it running. Change the parameters. Learn by doing.
+                </p>
+                <p class="philosophy-point">
+                    <strong>Ship fast. Iterate in public. Let the community lead.</strong><br>
+                    Perfection kills progress.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Built by AntManThePro | NEXUS Platform</p>
+        <p style="margin-top: 15px; font-size: 0.9rem;">
+            <a href="docs/NEXUS-LICENSE.md">License</a> • 
+            <a href="docs/NEXUS-COPYRIGHT.md">Copyright</a> • 
+            <a href="docs/README-NEXUS.md">Documentation</a>
+        </p>
+        <p style="margin-top: 20px; color: #888; font-size: 0.85rem;">
+            © 2026 AntManThePro | NEXUS v1.0
+        </p>
+    </footer>
+</body>
+</html>

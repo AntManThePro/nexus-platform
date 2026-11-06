@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS ANSI Laboratory | AntManThePro</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --primary: #00ff87;
+    --secondary: #60efff;
+    --accent: #ff0080;
+    --warning: #ffcc00;
+    --dark: #0a0e27;
+    --darker: #050610;
+    --panel: #1a1a2e;
+  }
+  body {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, var(--dark) 0%, #1a1a3e 50%, var(--darker) 100%);
+    color: var(--primary);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .container { max-width: 1280px; margin: 0 auto; padding: 16px; }
+  @media (min-width: 768px) { .container { padding: 24px; } }
+  .back-link { display: inline-block; color: var(--secondary); text-decoration: none; font-size: 0.85rem; margin-bottom: 16px; }
+  .back-link:hover { color: var(--warning); text-decoration: underline; }
+
+  header { margin-bottom: 32px; }
+  header h1 { font-size: 1.875rem; font-weight: 900; color: var(--primary); margin-bottom: 8px; }
+  @media (min-width: 768px) { header h1 { font-size: 3rem; } }
+  header p { color: var(--secondary); font-size: 0.875rem; }
+  @media (min-width: 768px) { header p { font-size: 1rem; } }
+
+  .layout { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; }
+  @media (min-width: 1024px) { .layout { grid-template-columns: repeat(4, 1fr); } }
+  .sidebar { display: flex; flex-direction: column; gap: 12px; }
+  .main-col { display: flex; flex-direction: column; gap: 16px; }
+  @media (min-width: 1024px) {
+    .sidebar { grid-column: span 1; }
+    .main-col { grid-column: span 3; }
+  }
+
+  .panel { border-radius: 8px; padding: 16px; background-color: var(--panel); }
+  .panel-tools { border: 2px solid var(--primary); }
+  .panel-export { border: 2px solid var(--accent); }
+  .panel h2, .panel h3 { font-weight: bold; font-size: 0.875rem; margin-bottom: 12px; }
+  .panel-tools h2 { color: var(--primary); }
+  .panel-export h3 { color: var(--accent); }
+
+  .tool-btn {
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%; padding: 8px 12px; margin-bottom: 8px;
+    border-radius: 4px; font-family: 'Courier New', monospace;
+    font-size: 0.875rem; font-weight: 600; text-align: left;
+    cursor: pointer; transition: opacity 0.2s;
+    background-color: transparent; color: var(--secondary);
+    border: 1px solid rgba(255, 0, 128, 0.133);
+    opacity: 0.6;
+  }
+  .tool-btn:hover { opacity: 1; }
+  .tool-btn.active {
+    background-color: var(--secondary); color: var(--dark);
+    border: 1px solid var(--secondary); opacity: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+  .tool-btn .chev { font-size: 0.8rem; }
+
+  .snippet-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; max-height: 384px; overflow-y: auto; padding-right: 4px; }
+  .snippet-btn {
+    width: 100%; padding: 4px 8px; border-radius: 4px;
+    font-family: 'Courier New', monospace; font-size: 0.75rem; text-align: left;
+    cursor: pointer; transition: background-color 0.2s;
+    background-color: rgba(96, 239, 255, 0.133); color: var(--secondary);
+    border: 1px solid rgba(96, 239, 255, 0.267);
+  }
+  .snippet-btn:hover { background-color: rgba(96, 239, 255, 0.267); }
+
+  .action-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 8px 12px; margin-bottom: 8px;
+    border-radius: 4px; font-family: 'Courier New', monospace;
+    font-size: 0.875rem; font-weight: bold; cursor: pointer;
+  }
+  .action-btn:last-child { margin-bottom: 0; }
+  .btn-render { background-color: var(--primary); color: var(--dark); border: none; }
+  .btn-render:hover { box-shadow: 0 0 16px rgba(0, 255, 135, 0.5); }
+  .btn-copy { background-color: transparent; border: 2px solid var(--secondary); color: var(--secondary); }
+  .btn-copy:hover { background-color: rgba(96, 239, 255, 0.1); }
+  .btn-download { background-color: var(--warning); color: var(--dark); border: none; }
+  .btn-download:hover { box-shadow: 0 0 16px rgba(255, 204, 0, 0.5); }
+
+  .editor-wrap { border: 2px solid var(--secondary); border-radius: 8px; overflow: hidden; }
+  #codeEditor {
+    display: block; width: 100%; height: 12rem; padding: 16px;
+    font-family: 'Courier New', monospace; font-size: 0.75rem;
+    background-color: var(--panel); color: var(--primary);
+    border: none; resize: none; outline: none; line-height: 1.6;
+  }
+  @media (min-width: 768px) { #codeEditor { height: 16rem; font-size: 0.875rem; } }
+
+  .preview-wrap { border: 2px solid var(--primary); border-radius: 8px; overflow: hidden; }
+  #preview {
+    padding: 16px; font-family: 'Courier New', monospace;
+    font-size: 0.75rem; min-height: 12rem;
+    background-color: var(--dark); color: var(--primary);
+    line-height: 1.6; white-space: pre-wrap; word-break: break-word;
+    overflow: auto;
+  }
+  @media (min-width: 768px) { #preview { font-size: 0.875rem; } }
+  #preview .preview-line { font-size: 0.75rem; }
+  @media (min-width: 768px) { #preview .preview-line { font-size: 0.875rem; } }
+  #preview .placeholder { opacity: 0.7; }
+
+  .info-box {
+    border: 2px solid var(--warning); border-radius: 8px; padding: 16px;
+    background-color: var(--panel); color: var(--warning);
+    font-size: 0.75rem;
+  }
+  @media (min-width: 768px) { .info-box { font-size: 0.875rem; } }
+
+  footer { text-align: center; padding-top: 24px; border-top: 2px solid var(--accent); }
+  footer p { color: var(--secondary); font-size: 0.75rem; }
+  @media (min-width: 768px) { footer p { font-size: 0.875rem; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <a class="back-link" href="../index.html">&larr; Back to NEXUS Hub</a>
+
+  <header>
+    <h1>&#9881;&#65039; NEXUS ANSI Laboratory</h1>
+    <p>Build terminal art with ANSI escape sequences &bull; Real-time rendering &bull; Export &amp; share</p>
+  </header>
+
+  <div class="layout">
+    <!-- Sidebar: Tools + Export -->
+    <div class="sidebar">
+      <div class="panel panel-tools">
+        <h2>Tools</h2>
+        <div id="toolButtons"></div>
+        <div class="snippet-list" id="snippetList"></div>
+      </div>
+
+      <div class="panel panel-export">
+        <h3>Export</h3>
+        <button class="action-btn btn-render" id="renderBtn" type="button">&#9654; Render</button>
+        <button class="action-btn btn-copy" id="copyBtn" type="button"><span id="copyIcon">&#10697;</span> <span id="copyLabel">Copy Code</span></button>
+        <button class="action-btn btn-download" id="downloadBtn" type="button">&#11015; Download</button>
+      </div>
+    </div>
+
+    <!-- Main: Editor + Preview + Info -->
+    <div class="main-col">
+      <div class="editor-wrap">
+        <textarea id="codeEditor" spellcheck="false">[H[2J[1;36m╔════════════════════════════════════════╗
+[1;32m║  NEXUS ANSI Art Laboratory              [1;36m║
+[1;32m║  Build Terminal Magic with Code         [1;36m║
+[1;32m║  AntManThePro © 2025                    [1;36m║
+[1;36m╚════════════════════════════════════════╝
+
+[1;33m> Initializing Neural Interface...
+[1;32m✓ Cortex Online
+[1;32m✓ Consciousness Engine Active
+[1;32m✓ Quantum Processors: READY
+[0;36m[Processing...] █████████░ 95%
+[1;35m
+[1;31m╭─ SYSTEM STATUS ─────────────────────────[0m
+[1;32m│ Status  : [1;32mOPERATIONAL
+[1;32m│ CPU     : [1;36m384 cores @ 5.6GHz
+[1;32m│ Memory  : [1;33m128GB DDR5 (92% utilized)
+[1;32m│ Network : [1;35m∞ Mbps (Connected)
+[1;32m│ Mode    : [1;34mSYNCHRONIZED
+[1;36m╰─────────────────────────────────────────[0m
+
+[1;32m$ whoami
+[1;36mAntManThePro
+[1;32m$ hostname
+[1;35mNEXUS-CONSCIOUSNESS
+[1;33m$ echo "Building the future..."
+[1;30mBuilding the future...</textarea>
+      </div>
+
+      <div class="preview-wrap">
+        <div id="preview"><span class="placeholder">&gt; Render output appears here...</span></div>
+      </div>
+
+      <div class="info-box">
+        <p>&#128161; <strong>Tip:</strong> ANSI codes use [ESC[ format. Replace [ with actual ESC character (\x1b) in output. Click tool buttons to insert snippets.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>NEXUS ANSI Lab &bull; Real-time Terminal Art Creation &bull; AntManThePro &copy; 2025</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var editor = document.getElementById('codeEditor');
+  var preview = document.getElementById('preview');
+  var toolButtonsEl = document.getElementById('toolButtons');
+  var snippetListEl = document.getElementById('snippetList');
+  var copyLabel = document.getElementById('copyLabel');
+  var copyTimer = null;
+  var selectedTool = 'color';
+
+  var colors = {
+    black: '0;30', red: '0;31', green: '0;32', yellow: '0;33',
+    blue: '0;34', magenta: '0;35', cyan: '0;36', white: '0;37',
+    brightRed: '1;31', brightGreen: '1;32', brightYellow: '1;33',
+    brightBlue: '1;34', brightMagenta: '1;35', brightCyan: '1;36'
+  };
+
+  var colorLabels = {
+    black: '\u26AB Black', red: '\uD83D\uDD34 Red', green: '\uD83D\uDFE2 Green', yellow: '\uD83D\uDFE1 Yellow',
+    blue: '\uD83D\uDD35 Blue', magenta: '\uD83D\uDFE3 Magenta', cyan: '\uD83D\uDD37 Cyan', white: '\u26AA White',
+    brightRed: '\uD83D\uDD34 Bright Red', brightGreen: '\uD83D\uDFE2 Bright Green', brightYellow: '\uD83D\uDFE1 Bright Yellow',
+    brightBlue: '\uD83D\uDD35 Bright Blue', brightMagenta: '\uD83D\uDFE3 Bright Magenta', brightCyan: '\uD83D\uDD37 Bright Cyan'
+  };
+
+  var tools = {
+    color: {
+      label: 'Color Codes',
+      snippets: Object.keys(colors).map(function (name) {
+        return { label: colorLabels[name], code: '[' + colors[name] + 'm' };
+      })
+    },
+    effects: {
+      label: 'Text Effects',
+      snippets: [
+        { label: '\uD83D\uDD06 Bold', code: '[1m' },
+        { label: '\uD83D\uDCC4 Dim', code: '[2m' },
+        { label: '\uD83D\uDD00 Italic', code: '[3m' },
+        { label: '\uD83D\uDCCF Underline', code: '[4m' },
+        { label: '\u26A1 Blink', code: '[5m' },
+        { label: '\uD83C\uDFA8 Reverse', code: '[7m' },
+        { label: '\uD83D\uDC7B Hidden', code: '[8m' },
+        { label: '\uD83D\uDEAB Strikethrough', code: '[9m' }
+      ]
+    },
+    control: {
+      label: 'Control Codes',
+      snippets: [
+        { label: '\uD83D\uDD04 Reset', code: '[0m' },
+        { label: '\uD83C\uDFE0 Home', code: '[H' },
+        { label: '\uD83D\uDDD1\uFE0F Clear Screen', code: '[2J' },
+        { label: '\uD83D\uDD24 Clear Line', code: '[K' },
+        { label: '\u2B06\uFE0F Cursor Up', code: '[A' },
+        { label: '\u2B07\uFE0F Cursor Down', code: '[B' },
+        { label: '\u27A1\uFE0F Cursor Right', code: '[C' },
+        { label: '\u2B05\uFE0F Cursor Left', code: '[D' }
+      ]
+    },
+    boxes: {
+      label: 'Box Drawing',
+      snippets: [
+        { label: '\u2554\u2550\u2557 Heavy Box', code: '\u2554\u2550\u2550\u2550\u2557\n\u2551   \u2551\n\u255A\u2550\u2550\u2550\u255D' },
+        { label: '\u250C\u2500\u2510 Light Box', code: '\u250C\u2500\u2500\u2500\u2510\n\u2502   \u2502\n\u2514\u2500\u2500\u2500\u2518' },
+        { label: '\u250F\u2501\u2513 Solid Box', code: '\u250F\u2501\u2501\u2501\u2513\n\u2503   \u2503\n\u2517\u2501\u2501\u2501\u251B' },
+        { label: '\u2502 Divider', code: '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500' },
+        { label: '\u2593\u2591 Pattern', code: '\u2593\u2592\u2591\u2593\u2592\u2591' }
+      ]
+    }
+  };
+
+  function renderToolButtons() {
+    toolButtonsEl.innerHTML = '';
+    Object.keys(tools).forEach(function (key) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tool-btn' + (selectedTool === key ? ' active' : '');
+      var label = document.createElement('span');
+      label.textContent = tools[key].label;
+      btn.appendChild(label);
+      if (selectedTool === key) {
+        var chev = document.createElement('span');
+        chev.className = 'chev';
+        chev.textContent = '\u25BE';
+        btn.appendChild(chev);
+      }
+      btn.addEventListener('click', function () {
+        selectedTool = key;
+        renderToolButtons();
+        renderSnippets();
+      });
+      toolButtonsEl.appendChild(btn);
+    });
+  }
+
+  function renderSnippets() {
+    snippetListEl.innerHTML = '';
+    tools[selectedTool].snippets.forEach(function (snippet) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'snippet-btn';
+      btn.title = 'Click to insert';
+      btn.textContent = snippet.label;
+      btn.addEventListener('click', function () {
+        insertSnippet(snippet.code);
+      });
+      snippetListEl.appendChild(btn);
+    });
+  }
+
+  function insertSnippet(snippet) {
+    var start = editor.selectionStart;
+    var end = editor.selectionEnd;
+    var before = editor.value.substring(0, start);
+    var after = editor.value.substring(end);
+    editor.value = before + snippet + after;
+    editor.focus();
+    var caret = start + snippet.length;
+    editor.setSelectionRange(caret, caret);
+  }
+
+  // Mirrors the React renderANSI: SGR sequences are shown literally as
+  // [ESC[...m] text, one div per line (empty line becomes a non-breaking space).
+  function renderANSI(text) {
+    var display = text.replace(/\x1b\[([0-9;]*)m/g, '[ESC[$1m]');
+    var lines = display.split('\n');
+    preview.innerHTML = '';
+    lines.forEach(function (line) {
+      var div = document.createElement('div');
+      div.className = 'preview-line';
+      div.textContent = line === '' ? '\u00A0' : line;
+      preview.appendChild(div);
+    });
+  }
+
+  function showPlaceholder() {
+    preview.innerHTML = '';
+    var span = document.createElement('span');
+    span.className = 'placeholder';
+    span.textContent = '> Render output appears here...';
+    preview.appendChild(span);
+  }
+
+  // Mirrors the React processANSI: every "[" becomes a real ESC char,
+  // then the preview shows the result via renderANSI.
+  function processANSI() {
+    var code = editor.value;
+    if (!code) {
+      showPlaceholder();
+      return;
+    }
+    var processed = code.replace(/\[/g, '\x1b[');
+    renderANSI(processed);
+  }
+
+  function copyCode() {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(editor.value).catch(function () {});
+    }
+    copyLabel.textContent = 'Copied!';
+    if (copyTimer) { clearTimeout(copyTimer); }
+    copyTimer = setTimeout(function () {
+      copyLabel.textContent = 'Copy Code';
+    }, 2000);
+  }
+
+  function escapeForTemplateLiteral(str) {
+    return str
+      .replace(/\\/g, '\\\\')
+      .replace(/`/g, '\\`')
+      .replace(/\$\{/g, '\\${')
+      .replace(/\x1b/g, '\\x1b');
+  }
+
+  // Mirrors the React downloadHTML: builds the same standalone terminal
+  // page embedding the current code, saved as nexus-terminal-<timestamp>.html.
+  function downloadHTML() {
+    var code = editor.value;
+    var html =
+      '<!DOCTYPE html>\n' +
+      '<html lang="en">\n' +
+      '<head>\n' +
+      '  <meta charset="UTF-8">\n' +
+      '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+      '  <title>NEXUS Terminal - AntManThePro</title>\n' +
+      '  <style>\n' +
+      '    body { \n' +
+      '      margin: 0; \n' +
+      '      padding: 20px; \n' +
+      '      background: #0a0e27; \n' +
+      "      font-family: 'Courier New', monospace;\n" +
+      '      display: flex;\n' +
+      '      justify-content: center;\n' +
+      '      align-items: center;\n' +
+      '      min-height: 100vh;\n' +
+      '    }\n' +
+      '    #terminal {\n' +
+      '      background: #1a1a2e;\n' +
+      '      color: #00ff87;\n' +
+      '      padding: 20px;\n' +
+      '      border-radius: 8px;\n' +
+      '      border: 2px solid #60efff;\n' +
+      '      box-shadow: 0 0 20px rgba(96, 239, 255, 0.5);\n' +
+      '      max-width: 800px;\n' +
+      '      white-space: pre-wrap;\n' +
+      '      word-wrap: break-word;\n' +
+      '      line-height: 1.4;\n' +
+      '      font-size: 14px;\n' +
+      '    }\n' +
+      '  </style>\n' +
+      '</head>\n' +
+      '<body>\n' +
+      '  <div id="terminal"></div>\n' +
+      '  <script>\n' +
+      '    const ansiText = `' + escapeForTemplateLiteral(code) + '`;\n' +
+      "    const terminal = document.getElementById('terminal');\n" +
+      "    terminal.innerHTML = ansiText.replace(/</g, '&lt;').replace(/>/g, '&gt;');\n" +
+      '  <\/script>\n' +
+      '</body>\n' +
+      '</html>';
+
+    var blob = new Blob([html], { type: 'text/html' });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = 'nexus-terminal-' + Date.now() + '.html';
+    link.click();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  document.getElementById('renderBtn').addEventListener('click', processANSI);
+  document.getElementById('copyBtn').addEventListener('click', copyCode);
+  document.getElementById('downloadBtn').addEventListener('click', downloadHTML);
+
+  renderToolButtons();
+  renderSnippets();
+})();
+</script>
+</body>
+</html>

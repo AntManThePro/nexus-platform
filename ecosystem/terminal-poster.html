@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS Terminal Poster — AntManThePro</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #00ff87;
+  --secondary: #60efff;
+  --accent: #ff0080;
+  --warning: #ffcc00;
+  --bg: #0a0e27;
+  --text: #e0e0e0;
+}
+body {
+  font-family: 'Courier New', monospace;
+  background: var(--bg);
+  color: var(--primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+a { color: var(--secondary); }
+.back-link {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: var(--secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.back-link:hover { color: var(--warning); }
+.container { max-width: 1280px; margin: 0 auto; padding: 16px; }
+@media (min-width: 768px) { .container { padding: 32px; } }
+header { margin-bottom: 48px; text-align: center; }
+header h1 {
+  font-size: clamp(2rem, 6vw, 3.75rem);
+  font-weight: 900;
+  margin-bottom: 8px;
+  letter-spacing: -2px;
+  color: var(--primary);
+}
+header p { color: var(--secondary); font-size: 1.125rem; }
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+@media (min-width: 1024px) { .layout { grid-template-columns: 1fr 2fr; } }
+.controls-col { display: flex; flex-direction: column; gap: 24px; }
+.panel {
+  border-radius: 8px;
+  padding: 24px;
+  border: 2px solid var(--primary);
+  background: var(--bg);
+  opacity: 0.95;
+}
+.panel h2 { font-size: 1.25rem; font-weight: bold; margin-bottom: 16px; color: var(--primary); }
+.panel h3 { font-size: 0.875rem; font-weight: bold; margin-bottom: 12px; color: var(--accent); }
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--secondary);
+}
+.field input[type="text"] {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 2px solid var(--accent);
+  background: var(--bg);
+  color: var(--primary);
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+.field input[type="range"] { width: 100%; accent-color: var(--primary); }
+.scheme-list { display: flex; flex-direction: column; gap: 8px; }
+.scheme-btn {
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+.scheme-btn.active { opacity: 1; transform: scale(1.05); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5); }
+.actions { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
+.btn {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: box-shadow 0.2s;
+  background: var(--primary);
+  color: var(--bg);
+  border: none;
+}
+.btn:hover { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); }
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--secondary);
+  color: var(--secondary);
+}
+.stats { display: flex; flex-direction: column; gap: 8px; font-size: 0.875rem; color: var(--secondary); }
+.stats .dot-primary { color: var(--primary); }
+.stats .dot-accent { color: var(--accent); }
+.stats .dot-warning { color: var(--warning); }
+.canvas-wrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 3px solid var(--primary);
+  box-shadow: 0 0 40px rgba(0, 255, 135, 0.27);
+}
+.canvas-wrap canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 0 20px rgba(255, 0, 128, 0.53));
+}
+.mobile-info {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 4px;
+  border: 2px solid var(--secondary);
+}
+.mobile-info p { font-size: 0.875rem; color: var(--secondary); }
+@media (min-width: 1024px) { .mobile-info { display: none; } }
+footer {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 2px solid var(--accent);
+}
+footer p { text-align: center; font-size: 0.875rem; color: var(--secondary); }
+</style>
+</head>
+<body>
+<div class="container">
+  <a class="back-link" href="../index.html">&larr; Back to NEXUS Hub</a>
+  <header>
+    <h1>&#9889; NEXUS Terminal Poster</h1>
+    <p>Generate stunning ANSI-art terminal posters for your portfolio</p>
+  </header>
+
+  <div class="layout">
+    <div class="controls-col">
+      <div class="panel" id="configPanel">
+        <h2>Configuration</h2>
+
+        <div class="field">
+          <label for="textInput">Display Text</label>
+          <input type="text" id="textInput" value="AntManThePro" maxlength="20">
+        </div>
+
+        <div class="field">
+          <label for="fontSizeInput">Font Size: <span id="fontSizeLabel">12</span>px</label>
+          <input type="range" id="fontSizeInput" min="8" max="18" step="1" value="12">
+        </div>
+
+        <div class="field">
+          <label for="complexityInput">Complexity: <span id="complexityLabel">70</span>%</label>
+          <input type="range" id="complexityInput" min="0" max="1" step="0.1" value="0.7">
+        </div>
+
+        <div class="field">
+          <label>Color Scheme</label>
+          <div class="scheme-list" id="schemeList"></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="downloadBtn" type="button">&#11015; Download</button>
+          <button class="btn btn-outline" id="copyBtn" type="button"><span id="copyLabel">&#128203; Copy to Clipboard</span></button>
+        </div>
+      </div>
+
+      <div class="panel" id="statsPanel">
+        <h3>Portfolio Stats</h3>
+        <div class="stats">
+          <p><span class="dot-primary">&#9679;</span> Canvas Rendering Engine</p>
+          <p><span class="dot-accent">&#9679;</span> Real-time Generation</p>
+          <p><span class="dot-warning">&#9679;</span> High-DPI Support</p>
+          <p><span class="dot-primary">&#9679;</span> Responsive Design</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="posterCanvas"></canvas>
+      </div>
+      <div class="mobile-info">
+        <p>&#128161; Tap "Download" to save your poster. Works perfectly on mobile!</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Built with Canvas API and algorithmic rendering &bull; AntManThePro &copy; 2025</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var canvas = document.getElementById('posterCanvas');
+  var textInput = document.getElementById('textInput');
+  var fontSizeInput = document.getElementById('fontSizeInput');
+  var fontSizeLabel = document.getElementById('fontSizeLabel');
+  var complexityInput = document.getElementById('complexityInput');
+  var complexityLabel = document.getElementById('complexityLabel');
+  var schemeList = document.getElementById('schemeList');
+  var downloadBtn = document.getElementById('downloadBtn');
+  var copyBtn = document.getElementById('copyBtn');
+  var copyLabel = document.getElementById('copyLabel');
+
+  var text = 'AntManThePro';
+  var fontSize = 12;
+  var complexity = 0.7;
+  var colorScheme = 'nexus';
+  var copied = false;
+  var canvasImage = null;
+  var copyTimer = null;
+
+  var colorSchemes = {
+    nexus: {
+      primary: '#00ff87',
+      secondary: '#60efff',
+      accent: '#ff0080',
+      warning: '#ffcc00',
+      bg: '#0a0e27',
+      text: '#e0e0e0'
+    },
+    hacker: {
+      primary: '#00ff41',
+      secondary: '#ff006e',
+      accent: '#00d9ff',
+      warning: '#ffbe0b',
+      bg: '#0d0221',
+      text: '#cccccc'
+    },
+    cyber: {
+      primary: '#ff006e',
+      secondary: '#00f5ff',
+      accent: '#ffbe0b',
+      warning: '#8338ec',
+      bg: '#1a1a2e',
+      text: '#eeeeee'
+    }
+  };
+
+  var chars = {
+    dense: '\u2588\u2593\u2592\u2591@%#*+=-:. ',
+    medium: '\u2588\u2593\u2592\u2591@#*+=:. ',
+    sparse: '\u2588\u2593\u2591@#+:. '
+  };
+
+  var systemData = {
+    'CPU': 'Intel i9 Turbo',
+    'GPU': 'NVIDIA RTX 4090',
+    'RAM': '128GB DDR5',
+    'SSD': '4TB NVMe',
+    'Kernel': 'Linux 6.8.0',
+    'Shell': '/bin/bash',
+    'Node': 'v20.10.0',
+    'React': '18.3.1',
+    'WebGL': 'ANGLE',
+    'Display': '4K @ 144Hz'
+  };
+
+  function generateASCIIArt(ctx, width, height) {
+    var scheme = colorSchemes[colorScheme];
+    var charSet = chars.dense;
+    var charWidth = fontSize * 0.6;
+    var charHeight = fontSize * 1.2;
+    var cols = Math.floor(width / charWidth);
+    var rows = Math.floor(height / charHeight);
+
+    // Clear canvas with gradient
+    var gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, scheme.bg);
+    gradient.addColorStop(0.5, scheme.bg + 'dd');
+    gradient.addColorStop(1, scheme.bg);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Add noise texture
+    var imageData = ctx.getImageData(0, 0, width, height);
+    var data = imageData.data;
+    for (var i = 0; i < data.length; i += 4) {
+      var noise = Math.random() * 8;
+      data[i + 3] = Math.max(0, data[i + 3] - noise);
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    // Draw text-based visualization
+    ctx.font = 'bold ' + fontSize + "px 'Courier New', monospace";
+    ctx.textBaseline = 'top';
+    ctx.letterSpacing = '-2px';
+
+    var colorIndex = 0;
+    var colors = [scheme.primary, scheme.secondary, scheme.accent, scheme.warning];
+
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        if (Math.random() < 1 - complexity) continue;
+
+        var ch = charSet[Math.floor(Math.random() * charSet.length)];
+        var x = c * charWidth;
+        var y = r * charHeight;
+
+        // Glow effect
+        ctx.shadowColor = colors[colorIndex % colors.length];
+        ctx.shadowBlur = 8;
+        ctx.globalAlpha = 0.6;
+
+        ctx.fillStyle = colors[colorIndex % colors.length];
+        ctx.fillText(ch, x, y);
+
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+
+        colorIndex++;
+      }
+    }
+
+    // Draw main text
+    ctx.font = 'bold ' + (fontSize * 3) + "px 'Courier New', monospace";
+    ctx.fillStyle = scheme.primary;
+    ctx.shadowColor = scheme.accent;
+    ctx.shadowBlur = 20;
+    ctx.textAlign = 'center';
+    ctx.globalAlpha = 0.95;
+    ctx.fillText(text, width / 2, height / 3);
+
+    // Draw system info overlay (first 5 entries, as in the source)
+    ctx.font = (fontSize * 0.8) + "px 'Courier New', monospace";
+    ctx.globalAlpha = 0.7;
+    ctx.textAlign = 'left';
+    var infoY = height * 0.6;
+
+    Object.entries(systemData).slice(0, 5).forEach(function (entry) {
+      var key = entry[0];
+      var value = entry[1];
+      ctx.fillStyle = scheme.secondary;
+      ctx.fillText(key + ':', 20, infoY);
+      ctx.fillStyle = scheme.primary;
+      ctx.fillText(value, 150, infoY);
+      infoY += fontSize + 5;
+    });
+
+    ctx.globalAlpha = 1;
+  }
+
+  function renderPoster() {
+    var dpr = window.devicePixelRatio || 1;
+    var width = 1200 * dpr;
+    var height = 800 * dpr;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    generateASCIIArt(ctx, 1200, 800);
+    canvasImage = canvas.toDataURL('image/png');
+  }
+
+  function applyScheme() {
+    var scheme = colorSchemes[colorScheme];
+    var root = document.documentElement.style;
+    root.setProperty('--primary', scheme.primary);
+    root.setProperty('--secondary', scheme.secondary);
+    root.setProperty('--accent', scheme.accent);
+    root.setProperty('--warning', scheme.warning);
+    root.setProperty('--bg', scheme.bg);
+    root.setProperty('--text', scheme.text);
+    document.body.style.backgroundColor = scheme.bg;
+
+    var buttons = schemeList.querySelectorAll('.scheme-btn');
+    buttons.forEach(function (btn) {
+      btn.classList.toggle('active', btn.dataset.scheme === colorScheme);
+    });
+  }
+
+  function refresh() {
+    applyScheme();
+    renderPoster();
+  }
+
+  // Build the color-scheme buttons from the scheme table (as in the source)
+  Object.keys(colorSchemes).forEach(function (schemeName) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'scheme-btn';
+    btn.dataset.scheme = schemeName;
+    btn.textContent = schemeName;
+    btn.style.backgroundColor = colorSchemes[schemeName].primary;
+    btn.style.color = colorSchemes[schemeName].bg;
+    btn.addEventListener('click', function () {
+      colorScheme = schemeName;
+      refresh();
+    });
+    schemeList.appendChild(btn);
+  });
+
+  textInput.addEventListener('input', function () {
+    text = textInput.value.substring(0, 20);
+    renderPoster();
+  });
+
+  fontSizeInput.addEventListener('input', function () {
+    fontSize = parseInt(fontSizeInput.value, 10);
+    fontSizeLabel.textContent = fontSize;
+    renderPoster();
+  });
+
+  complexityInput.addEventListener('input', function () {
+    complexity = parseFloat(complexityInput.value);
+    complexityLabel.textContent = Math.round(complexity * 100);
+    renderPoster();
+  });
+
+  downloadBtn.addEventListener('click', function () {
+    var link = document.createElement('a');
+    link.href = canvasImage;
+    link.download = 'nexus-terminal-' + Date.now() + '.png';
+    link.click();
+  });
+
+  copyBtn.addEventListener('click', function () {
+    canvas.toBlob(function (blob) {
+      navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+      copied = true;
+      copyLabel.innerHTML = '&#10003; Copied!';
+      if (copyTimer) clearTimeout(copyTimer);
+      copyTimer = setTimeout(function () {
+        copied = false;
+        copyLabel.innerHTML = '&#128203; Copy to Clipboard';
+      }, 2000);
+    });
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS ANSI Terminal Art Curator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a0f2e 100%);
+            color: #00ff87;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .curator-container { max-width: 1200px; margin: 0 auto; }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .ant-mascot {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        h1 {
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            background: linear-gradient(90deg, #00ff87, #60efff, #ff0080, #ffcc00, #00ff87);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+        .subtitle { color: #60efff; font-size: 0.95rem; margin-bottom: 5px; }
+        .meta { color: #ff0080; font-size: 0.85rem; }
+        .main-workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 1024px) {
+            .main-workspace { grid-template-columns: 1fr; }
+        }
+        .section {
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid #00ff87;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 135, 0.3);
+        }
+        .preview-section {
+            border-color: #60efff;
+            box-shadow: 0 0 20px rgba(96, 239, 255, 0.3);
+        }
+        .title {
+            color: #ffcc00;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ff0080;
+            padding-bottom: 10px;
+        }
+        textarea {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            color: #00ff87;
+            border: 1px solid #60efff;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: none;
+            line-height: 1.4;
+            caret-color: #ffcc00;
+            outline: none;
+        }
+        textarea:focus {
+            box-shadow: inset 0 0 15px rgba(96, 239, 255, 0.2);
+        }
+        .preview-box {
+            background: #000;
+            border: 1px solid #60efff;
+            border-radius: 4px;
+            padding: 15px;
+            height: 400px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-break: break-all;
+            overflow-y: auto;
+            color: #00ff87;
+        }
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+            gap: 5px;
+            margin-top: 15px;
+        }
+        .char-btn {
+            aspect-ratio: 1;
+            border: 1px solid #00ff87;
+            background: #000;
+            color: #00ff87;
+            cursor: pointer;
+            border-radius: 2px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .char-btn:hover {
+            background: rgba(0, 255, 135, 0.2);
+            box-shadow: 0 0 8px rgba(0, 255, 135, 0.5);
+            transform: scale(1.1);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button {
+            padding: 12px 16px;
+            border: 2px solid #00ff87;
+            background: transparent;
+            color: #00ff87;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: rgba(0, 255, 135, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 135, 0.5);
+        }
+        button.accent {
+            border-color: #ff0080;
+            color: #ff0080;
+        }
+        button.accent:hover {
+            background: rgba(255, 0, 128, 0.1);
+            box-shadow: 0 0 15px rgba(255, 0, 128, 0.5);
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            background: #000;
+            color: #00ff87;
+            border: 1px solid #60efff;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            outline: none;
+        }
+        input[type="text"]:focus {
+            box-shadow: 0 0 10px rgba(96, 239, 255, 0.5);
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #00ff87;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+        .gallery {
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid #60efff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(96, 239, 255, 0.3);
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .gallery-item {
+            background: #000;
+            border: 2px solid #ff0080;
+            border-radius: 4px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            max-height: 200px;
+            overflow: hidden;
+        }
+        .gallery-item:hover {
+            border-color: #00ff87;
+            box-shadow: 0 0 15px rgba(0, 255, 135, 0.4);
+            transform: translateY(-5px);
+        }
+        .item-name {
+            color: #ffcc00;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .item-preview {
+            color: #00ff87;
+            font-size: 0.75rem;
+            line-height: 1.3;
+            white-space: pre-wrap;
+            word-break: break-all;
+            overflow: hidden;
+            max-height: 120px;
+        }
+        .item-delete {
+            margin-top: 8px;
+            padding: 5px 8px;
+            font-size: 0.7rem;
+            width: 100%;
+            border-color: #ff0080;
+            color: #ff0080;
+        }
+        .empty {
+            color: #60efff;
+            text-align: center;
+            padding: 40px;
+            opacity: 0.7;
+        }
+        @media (max-width: 768px) {
+            textarea, .preview-box { height: 300px; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="curator-container">
+        <header>
+            <div class="ant-mascot">🐜</div>
+            <h1>NEXUS ANSI CURATOR</h1>
+            <p class="subtitle">✨ Create • Curate • Share ASCII Art</p>
+            <p class="meta">Engineered by AntManThePro | NEXUS</p>
+        </header>
+
+        <div class="main-workspace">
+            <div class="section">
+                <div class="title">📝 Editor Canvas</div>
+                <textarea id="canvas" placeholder="Type or insert characters to create ASCII art..."></textarea>
+
+                <div class="input-group">
+                    <input type="text" id="charInput" placeholder="Paste or type characters...">
+                    <button class="accent" onclick="insertChar()">Insert</button>
+                </div>
+
+                <div class="title" style="margin-top: 20px;">⚡ Special Characters</div>
+                <div class="char-grid" id="charGrid"></div>
+
+                <div class="controls">
+                    <button class="accent" onclick="clearCanvas()">Clear</button>
+                    <button class="accent" onclick="copyClip()">Copy</button>
+                    <button class="accent" onclick="downloadTxt()">Download</button>
+                </div>
+
+                <div class="stats">
+                    <span>Characters: <strong id="charCount">0</strong></span>
+                    <span>Lines: <strong id="lineCount">0</strong></span>
+                </div>
+            </div>
+
+            <div class="section preview-section">
+                <div class="title">👁️ Live Preview</div>
+                <div class="preview-box" id="preview">(Your art will appear here...)</div>
+
+                <div style="margin-top: 20px;">
+                    <div class="title">💾 Save Artwork</div>
+                    <div class="input-group">
+                        <input type="text" id="artName" placeholder="Artwork name...">
+                        <button class="accent" onclick="saveArt()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery">
+            <div class="title">🎨 Saved Artworks (<span id="galleryCount">0</span>)</div>
+            <div class="gallery-grid" id="galleryGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        const specialChars = ['█', '▓', '▒', '░', '╔', '╗', '╚', '╝', '═', '║', '✦', '⚡', '◆', '◊', '•', '○', '◈', '★'];
+        let artworks = [];
+
+        // Initialize
+        function init() {
+            loadGallery();
+            renderCharGrid();
+            updatePreview();
+            document.getElementById('canvas').addEventListener('input', updatePreview);
+            document.getElementById('charInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') insertChar();
+            });
+        }
+
+        function renderCharGrid() {
+            const grid = document.getElementById('charGrid');
+            specialChars.forEach(char => {
+                const btn = document.createElement('button');
+                btn.className = 'char-btn';
+                btn.textContent = char;
+                btn.onclick = () => insertFromButton(char);
+                grid.appendChild(btn);
+            });
+        }
+
+        function insertFromButton(char) {
+            const ta = document.getElementById('canvas');
+            const start = ta.selectionStart;
+            const end = ta.selectionEnd;
+            const text = ta.value;
+            ta.value = text.substring(0, start) + char + text.substring(end);
+            ta.focus();
+            ta.setSelectionRange(start + 1, start + 1);
+            updatePreview();
+        }
+
+        function insertChar() {
+            const input = document.getElementById('charInput');
+            if (input.value) {
+                insertFromButton(input.value);
+                input.value = '';
+            }
+        }
+
+        function updatePreview() {
+            const text = document.getElementById('canvas').value;
+            document.getElementById('preview').textContent = text || '(Your art will appear here...)';
+            document.getElementById('charCount').textContent = text.length;
+            document.getElementById('lineCount').textContent = text.split('\n').length;
+        }
+
+        function saveArt() {
+            const content = document.getElementById('canvas').value;
+            const name = document.getElementById('artName').value || 'Untitled';
+            
+            if (!content.trim()) {
+                alert('Canvas is empty!');
+                return;
+            }
+            
+            artworks.push({
+                id: Date.now(),
+                name: name,
+                content: content
+            });
+            
+            localStorage.setItem('nexus-artworks', JSON.stringify(artworks));
+            document.getElementById('artName').value = '';
+            renderGallery();
+            alert('Artwork saved! 🎨');
+        }
+
+        function loadGallery() {
+            const saved = localStorage.getItem('nexus-artworks');
+            artworks = saved ? JSON.parse(saved) : [];
+            renderGallery();
+        }
+
+        function renderGallery() {
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = '';
+            document.getElementById('galleryCount').textContent = artworks.length;
+            
+            if (artworks.length === 0) {
+                grid.innerHTML = '<div class="empty" style="grid-column: 1/-1;">No saved artworks yet. Create your first masterpiece!</div>';
+                return;
+            }
+            
+            artworks.forEach(art => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.innerHTML = `
+                    <div class="item-name">${art.name}</div>
+                    <div class="item-preview">${art.content}</div>
+                    <button class="item-delete" onclick="deleteArt(${art.id})">Delete</button>
+                `;
+                item.querySelector('.item-preview').onclick = () => loadArt(art.id);
+                grid.appendChild(item);
+            });
+        }
+
+        function loadArt(id) {
+            const art = artworks.find(a => a.id === id);
+            if (art) {
+                document.getElementById('canvas').value = art.content;
+                document.getElementById('artName').value = art.name;
+                updatePreview();
+            }
+        }
+
+        function deleteArt(id) {
+            if (confirm('Delete this artwork?')) {
+                artworks = artworks.filter(a => a.id !== id);
+                localStorage.setItem('nexus-artworks', JSON.stringify(artworks));
+                renderGallery();
+            }
+        }
+
+        function clearCanvas() {
+            if (confirm('Clear the canvas?')) {
+                document.getElementById('canvas').value = '';
+                updatePreview();
+            }
+        }
+
+        function copyClip() {
+            const text = document.getElementById('canvas').value;
+            navigator.clipboard.writeText(text);
+            alert('Copied to clipboard! 📋');
+        }
+
+        function downloadTxt() {
+            const text = document.getElementById('canvas').value;
+            const name = document.getElementById('artName').value || 'ansi-art';
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name + '.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Start
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

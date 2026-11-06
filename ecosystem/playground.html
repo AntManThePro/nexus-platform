@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS ANSI Playground | AntManThePro</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0f0f2e 100%);
+            color: #00ff87;
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+        .playground { max-width: 1600px; margin: 0 auto; }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease-out;
+        }
+        h1 {
+            font-size: clamp(1.5rem, 5vw, 3rem);
+            background: linear-gradient(90deg, #00ff87, #60efff, #ff0080, #ffcc00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .subtitle { color: #60efff; font-size: 0.85rem; margin-bottom: 5px; }
+        .byline { color: #ff0080; font-size: 0.8rem; }
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr 300px;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 1200px) {
+            .workspace { grid-template-columns: 1fr 1fr; }
+            .control-panel { grid-column: 1 / -1; }
+        }
+        @media (max-width: 768px) {
+            .workspace { grid-template-columns: 1fr; }
+        }
+        .panel {
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid #00ff87;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(0, 255, 135, 0.3);
+        }
+        .panel.preview { border-color: #60efff; }
+        .panel.control { border-color: #ffcc00; }
+        .panel-title {
+            color: #ffcc00;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #ff0080;
+            padding-bottom: 8px;
+        }
+        textarea {
+            width: 100%;
+            height: 350px;
+            background: #000;
+            color: #00ff87;
+            border: 1px solid #60efff;
+            border-radius: 4px;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            resize: none;
+            line-height: 1.3;
+            caret-color: #ffcc00;
+            outline: none;
+        }
+        textarea:focus { box-shadow: inset 0 0 12px rgba(96, 239, 255, 0.2); }
+        .preview {
+            background: #000;
+            border: 1px solid #60efff;
+            border-radius: 4px;
+            padding: 12px;
+            height: 350px;
+            font-size: 0.8rem;
+            line-height: 1.3;
+            white-space: pre-wrap;
+            word-break: break-all;
+            overflow-y: auto;
+            color: #00ff87;
+        }
+        .timeline {
+            background: #000;
+            border: 1px solid #60efff;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 12px 0;
+            height: 120px;
+            overflow-x: auto;
+            display: flex;
+            gap: 6px;
+            align-items: flex-end;
+        }
+        .frame {
+            flex-shrink: 0;
+            width: 60px;
+            height: 80px;
+            background: rgba(0, 255, 135, 0.1);
+            border: 2px solid #00ff87;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #60efff;
+        }
+        .frame:hover {
+            background: rgba(0, 255, 135, 0.3);
+            box-shadow: 0 0 8px rgba(0, 255, 135, 0.5);
+            transform: translateY(-5px);
+        }
+        .frame.active {
+            background: rgba(255, 0, 128, 0.3);
+            border-color: #ff0080;
+            box-shadow: 0 0 12px rgba(255, 0, 128, 0.6);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 12px 0;
+        }
+        button {
+            padding: 10px 12px;
+            border: 2px solid #00ff87;
+            background: transparent;
+            color: #00ff87;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: rgba(0, 255, 135, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 135, 0.4);
+        }
+        button.accent {
+            border-color: #ff0080;
+            color: #ff0080;
+        }
+        button.accent:hover {
+            background: rgba(255, 0, 128, 0.1);
+            box-shadow: 0 0 10px rgba(255, 0, 128, 0.4);
+        }
+        button.success {
+            border-color: #ffcc00;
+            color: #ffcc00;
+        }
+        button.success:hover {
+            background: rgba(255, 204, 0, 0.1);
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.4);
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #ff0080;
+        }
+        .tab {
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            color: #00ff87;
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab:hover { color: #60efff; }
+        .tab.active {
+            color: #ffcc00;
+            border-bottom-color: #ffcc00;
+            box-shadow: 0 0 8px rgba(255, 204, 0, 0.3);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .control-group {
+            margin: 10px 0;
+        }
+        .control-label {
+            color: #60efff;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #ff0080, #00ff87);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            background: #ffcc00;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(255, 204, 0, 0.7);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 10px;
+            height: 10px;
+            background: #ffcc00;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 0 8px rgba(255, 204, 0, 0.7);
+        }
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #60efff;
+            margin: 6px 0;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(0, 255, 135, 0.1);
+        }
+        .stat-value { color: #ffcc00; font-weight: bold; }
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            margin: 10px 0;
+        }
+        .char-btn {
+            aspect-ratio: 1;
+            border: 1px solid #00ff87;
+            background: #000;
+            color: #00ff87;
+            cursor: pointer;
+            border-radius: 2px;
+            font-size: 0.8rem;
+            transition: all 0.15s;
+        }
+        .char-btn:hover {
+            background: rgba(0, 255, 135, 0.15);
+            box-shadow: 0 0 6px rgba(0, 255, 135, 0.4);
+            transform: scale(1.05);
+        }
+        .export-area {
+            background: #000;
+            border: 1px solid #60efff;
+            border-radius: 3px;
+            padding: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.65rem;
+            color: #00ff87;
+            line-height: 1.2;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .playing { animation: pulse 1s infinite; color: #ff0080; }
+        @media (max-width: 768px) {
+            textarea, .preview { height: 250px; }
+            .timeline { height: 80px; }
+            .frame { width: 50px; height: 60px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="playground">
+        <header>
+            <h1>NEXUS ANSI PLAYGROUND</h1>
+            <p class="subtitle">🎬 Animate • Generate • Export ASCII Art</p>
+            <p class="byline">Engineered by AntManThePro | NEXUS</p>
+        </header>
+
+        <div class="workspace">
+            <!-- Animation Editor -->
+            <div class="panel">
+                <div class="panel-title">📝 Animation Editor</div>
+                <textarea id="frameEditor" placeholder="Frame content goes here..."></textarea>
+                <div class="timeline" id="timeline"></div>
+                <div class="controls">
+                    <button onclick="addFrame()">+ Frame</button>
+                    <button onclick="deleteFrame()" class="accent">Delete</button>
+                    <button onclick="playAnimation()" id="playBtn" class="success">▶ Play</button>
+                    <button onclick="clearAnimation()" class="accent">Clear</button>
+                </div>
+            </div>
+
+            <!-- Preview & Generator -->
+            <div class="panel preview">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab(0)">Preview</button>
+                    <button class="tab" onclick="switchTab(1)">Generate</button>
+                </div>
+
+                <div id="tab0" class="tab-content active">
+                    <div class="panel-title">👁️ Animation Preview</div>
+                    <div class="preview" id="preview">Load or create animation...</div>
+                    <div style="margin-top: 10px; font-size: 0.75rem; color: #60efff;">
+                        <div class="stat">
+                            <span>Frame Rate:</span>
+                            <span class="stat-value" id="fpsDisplay">100ms</span>
+                        </div>
+                        <div class="stat">
+                            <span>Current Frame:</span>
+                            <span class="stat-value" id="frameNum">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab1" class="tab-content">
+                    <div class="panel-title">✨ Procedural Generator</div>
+                    <div class="control-group">
+                        <div class="control-label">Pattern Type</div>
+                        <div class="controls">
+                            <button onclick="generateFractal()" class="success">Fractal</button>
+                            <button onclick="generateCellular()" class="success">Cellular</button>
+                            <button onclick="generateChaos()" class="success">Chaos</button>
+                            <button onclick="generateWave()" class="success">Wave</button>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">Pattern Size</div>
+                        <input type="range" id="sizeSlider" min="5" max="20" value="10" onchange="updatePatternSize()">
+                        <div style="font-size: 0.75rem; color: #ffcc00; margin-top: 4px;">
+                            <span id="sizeDisplay">10x10</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">Characters</div>
+                        <div class="char-grid">
+                            <button class="char-btn" onclick="setProcChar('█')">█</button>
+                            <button class="char-btn" onclick="setProcChar('▓')">▓</button>
+                            <button class="char-btn" onclick="setProcChar('▒')">▒</button>
+                            <button class="char-btn" onclick="setProcChar('░')">░</button>
+                            <button class="char-btn" onclick="setProcChar('◆')">◆</button>
+                            <button class="char-btn" onclick="setProcChar('○')">○</button>
+                            <button class="char-btn" onclick="setProcChar('✦')">✦</button>
+                            <button class="char-btn" onclick="setProcChar('⚡')">⚡</button>
+                            <button class="char-btn" onclick="setProcChar('•')">•</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="panel control">
+                <div class="panel-title">⚙️ Controls</div>
+
+                <div class="control-group">
+                    <div class="control-label">Playback Speed</div>
+                    <input type="range" id="speedSlider" min="50" max="500" value="100" onchange="updateSpeed()">
+                    <div style="font-size: 0.75rem; color: #ffcc00; margin-top: 4px;">
+                        <span id="speedDisplay">100ms</span>
+                    </div>
+                </div>
+
+                <div class="controls" style="grid-template-columns: 1fr;">
+                    <button onclick="exportANSI()" class="success">Export ANSI</button>
+                    <button onclick="exportJSON()" class="success">Export JSON</button>
+                    <button onclick="exportText()" class="success">Export TXT</button>
+                    <button onclick="copyExport()" class="accent">Copy</button>
+                </div>
+
+                <div class="panel-title" style="margin-top: 15px;">📊 Stats</div>
+                <div class="stat">
+                    <span>Total Frames:</span>
+                    <span class="stat-value" id="totalFrames">0</span>
+                </div>
+                <div class="stat">
+                    <span>Frame Size:</span>
+                    <span class="stat-value" id="frameSize">0b</span>
+                </div>
+                <div class="stat">
+                    <span>Duration:</span>
+                    <span class="stat-value" id="duration">0s</span>
+                </div>
+
+                <div class="panel-title" style="margin-top: 15px;">📥 Export</div>
+                <div class="export-area" id="exportArea">Export data appears here...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let frames = [];
+        let currentFrameIdx = -1;
+        let isPlaying = false;
+        let playSpeed = 100;
+        let procChar = '█';
+        let patternSize = 10;
+
+        function addFrame() {
+            const content = document.getElementById('frameEditor').value;
+            if (frames.length >= 50) { alert('Max 50 frames'); return; }
+            frames.push(content);
+            renderTimeline();
+            setFrame(frames.length - 1);
+        }
+
+        function deleteFrame() {
+            if (currentFrameIdx < 0) return;
+            frames.splice(currentFrameIdx, 1);
+            renderTimeline();
+            if (frames.length === 0) {
+                currentFrameIdx = -1;
+                document.getElementById('frameEditor').value = '';
+                updateStats();
+            } else {
+                setFrame(Math.min(currentFrameIdx, frames.length - 1));
+            }
+        }
+
+        function setFrame(idx) {
+            currentFrameIdx = idx;
+            document.getElementById('frameEditor').value = frames[idx] || '';
+            renderTimeline();
+            updateStats();
+        }
+
+        function renderTimeline() {
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = '';
+            frames.forEach((frame, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'frame' + (idx === currentFrameIdx ? ' active' : '');
+                btn.textContent = idx + 1;
+                btn.onclick = () => setFrame(idx);
+                timeline.appendChild(btn);
+            });
+            document.getElementById('totalFrames').textContent = frames.length;
+        }
+
+        function playAnimation() {
+            if (!frames.length) return;
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('playBtn');
+            btn.classList.toggle('playing', isPlaying);
+            btn.textContent = isPlaying ? '⏸ Stop' : '▶ Play';
+            
+            if (isPlaying) {
+                let idx = 0;
+                const loop = () => {
+                    if (!isPlaying) return;
+                    document.getElementById('preview').textContent = frames[idx];
+                    document.getElementById('frameNum').textContent = (idx + 1) + '/' + frames.length;
+                    idx = (idx + 1) % frames.length;
+                    setTimeout(loop, playSpeed);
+                };
+                loop();
+            }
+        }
+
+        function clearAnimation() {
+            if (confirm('Clear all frames?')) {
+                frames = [];
+                currentFrameIdx = -1;
+                isPlaying = false;
+                document.getElementById('frameEditor').value = '';
+                document.getElementById('preview').textContent = 'Load or create animation...';
+                renderTimeline();
+                updateStats();
+            }
+        }
+
+        function updateSpeed() {
+            playSpeed = parseInt(document.getElementById('speedSlider').value);
+            document.getElementById('speedDisplay').textContent = playSpeed + 'ms';
+            document.getElementById('fpsDisplay').textContent = playSpeed + 'ms';
+        }
+
+        function updateStats() {
+            let totalSize = 0;
+            frames.forEach(f => totalSize += f.length);
+            document.getElementById('frameSize').textContent = (totalSize).toLocaleString() + 'b';
+            document.getElementById('duration').textContent = ((frames.length * playSpeed) / 1000).toFixed(2) + 's';
+        }
+
+        function updatePatternSize() {
+            patternSize = parseInt(document.getElementById('sizeSlider').value);
+            document.getElementById('sizeDisplay').textContent = patternSize + 'x' + patternSize;
+        }
+
+        function setProcChar(char) {
+            procChar = char;
+        }
+
+        function generateFractal() {
+            let pattern = '';
+            for (let y = 0; y < patternSize; y++) {
+                for (let x = 0; x < patternSize; x++) {
+                    const bit = ((x ^ y) & (x * y)) % 2;
+                    pattern += bit ? procChar : ' ';
+                }
+                pattern += '\n';
+            }
+            frames.push(pattern);
+            renderTimeline();
+            setFrame(frames.length - 1);
+        }
+
+        function generateCellular() {
+            let pattern = '';
+            let row = [];
+            for (let i = 0; i < patternSize; i++) {
+                row.push(Math.random() > 0.5 ? 1 : 0);
+            }
+            
+            for (let gen = 0; gen < patternSize; gen++) {
+                let line = '';
+                for (let i = 0; i < patternSize; i++) {
+                    line += row[i] ? procChar : ' ';
+                }
+                pattern += line + '\n';
+                
+                // Conway-like update
+                let newRow = [];
+                for (let i = 0; i < patternSize; i++) {
+                    const left = row[(i - 1 + patternSize) % patternSize];
+                    const center = row[i];
+                    const right = row[(i + 1) % patternSize];
+                    const sum = left + center + right;
+                    newRow.push((center && sum === 2) || sum === 3 ? 1 : 0);
+                }
+                row = newRow;
+            }
+            frames.push(pattern);
+            renderTimeline();
+            setFrame(frames.length - 1);
+        }
+
+        function generateChaos() {
+            let pattern = '';
+            let val = Math.random();
+            
+            for (let y = 0; y < patternSize; y++) {
+                for (let x = 0; x < patternSize; x++) {
+                    val = (val * 3.8 * (1 - val)) % 1;
+                    pattern += val > 0.5 ? procChar : ' ';
+                }
+                pattern += '\n';
+            }
+            frames.push(pattern);
+            renderTimeline();
+            setFrame(frames.length - 1);
+        }
+
+        function generateWave() {
+            let pattern = '';
+            for (let y = 0; y < patternSize; y++) {
+                for (let x = 0; x < patternSize; x++) {
+                    const wave = Math.sin((x + y) * Math.PI / patternSize + Date.now() / 100);
+                    pattern += wave > 0 ? procChar : ' ';
+                }
+                pattern += '\n';
+            }
+            frames.push(pattern);
+            renderTimeline();
+            setFrame(frames.length - 1);
+        }
+
+        function exportANSI() {
+            let ansi = '\x1b[2J\x1b[H'; // Clear and home
+            frames.forEach(frame => {
+                ansi += '\x1b[32m' + frame + '\x1b[0m\x1b[2J'; // Green text, clear
+            });
+            document.getElementById('exportArea').textContent = ansi.slice(0, 500) + (ansi.length > 500 ? '...' : '');
+            window.exportData = ansi;
+        }
+
+        function exportJSON() {
+            const data = { version: '1.0', frames: frames, duration: frames.length * playSpeed };
+            const json = JSON.stringify(data, null, 2);
+            document.getElementById('exportArea').textContent = json.slice(0, 500) + (json.length > 500 ? '...' : '');
+            window.exportData = json;
+        }
+
+        function exportText() {
+            const txt = frames.join('\n---\n');
+            document.getElementById('exportArea').textContent = txt.slice(0, 500) + (txt.length > 500 ? '...' : '');
+            window.exportData = txt;
+        }
+
+        function copyExport() {
+            if (window.exportData) {
+                navigator.clipboard.writeText(window.exportData);
+                alert('Exported! 📋');
+            }
+        }
+
+        function switchTab(idx) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab' + idx).classList.add('active');
+            document.querySelectorAll('.tab')[idx].classList.add('active');
+        }
+
+        // Initialize
+        updateSpeed();
+        updatePatternSize();
+    </script>
+</body>
+</html>

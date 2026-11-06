@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolutionary Algorithm Visualizer | AntManThePro</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0f0f2e 100%);
+            color: #00ff87;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            background: linear-gradient(90deg, #00ff87, #60efff, #ff0080, #ffcc00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #60efff;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .byline {
+            color: #ff0080;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .canvas-container {
+            border: 2px solid #00ff87;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 135, 0.3), inset 0 0 20px rgba(96, 239, 255, 0.1);
+            aspect-ratio: 16 / 9;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        .control-panel {
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid #60efff;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 0 15px rgba(96, 239, 255, 0.2);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .control-title {
+            color: #ffcc00;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #ff0080;
+            padding-bottom: 8px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-label {
+            color: #00ff87;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .control-value {
+            color: #ffcc00;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ff0080, #00ff87);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #ffcc00;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: #ffcc00;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px 12px;
+            border: 2px solid #00ff87;
+            background: transparent;
+            color: #00ff87;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: rgba(0, 255, 135, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 135, 0.5);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button.accent {
+            border-color: #ff0080;
+            color: #ff0080;
+        }
+
+        button.accent:hover {
+            background: rgba(255, 0, 128, 0.1);
+            box-shadow: 0 0 15px rgba(255, 0, 128, 0.5);
+        }
+
+        .stats-panel {
+            background: rgba(10, 14, 39, 0.95);
+            border: 2px solid #ffcc00;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+
+        .stat-label {
+            color: #60efff;
+        }
+
+        .stat-value {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+
+        .export-area {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #00ff87;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.7rem;
+            color: #00ff87;
+            font-family: 'Courier New', monospace;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .recording {
+            animation: pulse 1s infinite;
+            color: #ff0080;
+        }
+
+        @media (max-width: 768px) {
+            .control-panel {
+                position: static;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .canvas-container {
+                aspect-ratio: 4 / 3;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const EvolutionaryVisualizer = () => {
+            const canvasRef = useRef(null);
+            const [populationSize, setPopulationSize] = useState(50);
+            const [mutationRate, setMutationRate] = useState(0.1);
+            const [targetMode, setTargetMode] = useState('center');
+            const [generation, setGeneration] = useState(0);
+            const [isRunning, setIsRunning] = useState(false);
+            const [avgFitness, setAvgFitness] = useState(0);
+            const [bestFitness, setBestFitness] = useState(0);
+            const [populationRef] = useState({ current: [] });
+            const animationRef = useRef(null);
+
+            const initializePopulation = () => {
+                const canvas = canvasRef.current;
+                const pop = [];
+                for (let i = 0; i < populationSize; i++) {
+                    pop.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        vx: (Math.random() - 0.5) * 4,
+                        vy: (Math.random() - 0.5) * 4,
+                        fitness: 0
+                    });
+                }
+                populationRef.current = pop;
+                setGeneration(0);
+            };
+
+            const getTarget = (canvas) => {
+                switch (targetMode) {
+                    case 'center':
+                        return { x: canvas.width / 2, y: canvas.height / 2 };
+                    case 'mouse':
+                        return { x: canvas.width * 0.7, y: canvas.height * 0.3 };
+                    case 'spiral':
+                        return {
+                            x: canvas.width / 2 + Math.cos(generation * 0.02) * 150,
+                            y: canvas.height / 2 + Math.sin(generation * 0.02) * 150
+                        };
+                    default:
+                        return { x: canvas.width / 2, y: canvas.height / 2 };
+                }
+            };
+
+            const calculateFitness = (organism, target) => {
+                const dx = organism.x - target.x;
+                const dy = organism.y - target.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                return Math.max(0, 500 - distance);
+            };
+
+            const evolveGeneration = () => {
+                const canvas = canvasRef.current;
+                const target = getTarget(canvas);
+                const pop = populationRef.current;
+
+                // Calculate fitness
+                pop.forEach(org => {
+                    org.fitness = calculateFitness(org, target);
+                });
+
+                // Calculate stats
+                const totalFitness = pop.reduce((sum, org) => sum + org.fitness, 0);
+                const avg = totalFitness / pop.length;
+                const best = Math.max(...pop.map(org => org.fitness));
+                setAvgFitness(avg.toFixed(1));
+                setBestFitness(best.toFixed(1));
+
+                // Selection and breeding
+                const newPop = [];
+                for (let i = 0; i < pop.length; i++) {
+                    const parent1 = selectParent(pop, totalFitness);
+                    const parent2 = selectParent(pop, totalFitness);
+
+                    const child = {
+                        x: (parent1.x + parent2.x) / 2 + (Math.random() - 0.5) * 20,
+                        y: (parent1.y + parent2.y) / 2 + (Math.random() - 0.5) * 20,
+                        vx: (parent1.vx + parent2.vx) / 2,
+                        vy: (parent1.vy + parent2.vy) / 2,
+                        fitness: 0
+                    };
+
+                    // Mutation
+                    if (Math.random() < mutationRate) {
+                        child.vx += (Math.random() - 0.5) * 2;
+                        child.vy += (Math.random() - 0.5) * 2;
+                    }
+
+                    // Clamp to canvas
+                    child.x = Math.max(5, Math.min(canvas.width - 5, child.x));
+                    child.y = Math.max(5, Math.min(canvas.height - 5, child.y));
+
+                    newPop.push(child);
+                }
+
+                populationRef.current = newPop;
+                setGeneration(gen => gen + 1);
+            };
+
+            const selectParent = (pop, totalFitness) => {
+                let random = Math.random() * totalFitness;
+                for (const org of pop) {
+                    random -= org.fitness;
+                    if (random <= 0) return org;
+                }
+                return pop[pop.length - 1];
+            };
+
+            const animate = () => {
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                const target = getTarget(canvas);
+
+                // Clear with fade
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw grid
+                ctx.strokeStyle = 'rgba(0, 255, 135, 0.05)';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < canvas.width; i += 40) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, canvas.height);
+                    ctx.stroke();
+                }
+                for (let i = 0; i < canvas.height; i += 40) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, i);
+                    ctx.lineTo(canvas.width, i);
+                    ctx.stroke();
+                }
+
+                // Draw target
+                ctx.fillStyle = '#ffcc00';
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#ff0080';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw population
+                const pop = populationRef.current;
+                pop.forEach((org, idx) => {
+                    const hue = (org.fitness / 500) * 120;
+                    const saturation = 100;
+                    const lightness = 50;
+                    ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+
+                    ctx.beginPath();
+                    ctx.arc(org.x, org.y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Velocity visualization
+                    ctx.strokeStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, 0.5)`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(org.x, org.y);
+                    ctx.lineTo(org.x + org.vx * 8, org.y + org.vy * 8);
+                    ctx.stroke();
+
+                    // Update position
+                    org.x += org.vx;
+                    org.y += org.vy;
+
+                    // Bounce off walls
+                    if (org.x < 5 || org.x > canvas.width - 5) org.vx *= -1;
+                    if (org.y < 5 || org.y > canvas.height - 5) org.vy *= -1;
+                });
+
+                if (isRunning) {
+                    evolveGeneration();
+                    animationRef.current = requestAnimationFrame(animate);
+                } else {
+                    animationRef.current = requestAnimationFrame(animate);
+                }
+            };
+
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+
+                initializePopulation();
+                animationRef.current = requestAnimationFrame(animate);
+
+                const handleResize = () => {
+                    canvas.width = canvas.offsetWidth;
+                    canvas.height = canvas.offsetHeight;
+                };
+
+                window.addEventListener('resize', handleResize);
+                return () => {
+                    window.removeEventListener('resize', handleResize);
+                    cancelAnimationFrame(animationRef.current);
+                };
+            }, []);
+
+            const handleReset = () => {
+                setIsRunning(false);
+                initializePopulation();
+            };
+
+            return (
+                <div className="container">
+                    <header>
+                        <h1>EVOLUTIONARY ALGORITHM VISUALIZER</h1>
+                        <p className="subtitle">🧬 Watch genetic algorithms discover optimal solutions in real-time</p>
+                        <p className="byline">Built by AntManThePro</p>
+                    </header>
+
+                    <div className="main-grid">
+                        <div className="canvas-container">
+                            <canvas ref={canvasRef}></canvas>
+                        </div>
+
+                        <div className="control-panel">
+                            <div className="control-title">⚙️ Evolution Control</div>
+
+                            <div className="control-group">
+                                <label className="control-label">Population Size</label>
+                                <div className="control-value">{populationSize}</div>
+                                <input
+                                    type="range"
+                                    min="10"
+                                    max="200"
+                                    value={populationSize}
+                                    onChange={(e) => {
+                                        setPopulationSize(parseInt(e.target.value));
+                                        setIsRunning(false);
+                                    }}
+                                />
+                            </div>
+
+                            <div className="control-group">
+                                <label className="control-label">Mutation Rate</label>
+                                <div className="control-value">{(mutationRate * 100).toFixed(0)}%</div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="0.5"
+                                    step="0.01"
+                                    value={mutationRate}
+                                    onChange={(e) => setMutationRate(parseFloat(e.target.value))}
+                                />
+                            </div>
+
+                            <div className="control-group">
+                                <label className="control-label">Target Mode</label>
+                                <div className="button-group">
+                                    {['center', 'spiral', 'mouse'].map(mode => (
+                                        <button
+                                            key={mode}
+                                            className={targetMode === mode ? 'accent' : ''}
+                                            onClick={() => setTargetMode(mode)}
+                                        >
+                                            {mode}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="button-group">
+                                <button onClick={() => setIsRunning(!isRunning)}>
+                                    {isRunning ? '⏸ Pause' : '▶ Start'}
+                                </button>
+                                <button className="accent" onClick={handleReset}>
+                                    ↻ Reset
+                                </button>
+                            </div>
+
+                            <div className="stats-panel">
+                                <div className="control-title">📊 Statistics</div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Generation:</span>
+                                    <span className="stat-value">{generation}</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Avg Fitness:</span>
+                                    <span className="stat-value">{avgFitness}</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Best Fitness:</span>
+                                    <span className="stat-value">{bestFitness}</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Population:</span>
+                                    <span className="stat-value">{populationRef.current.length}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<EvolutionaryVisualizer />, document.getElementById('root'));
+    </script>
+</body>
+</html>
