@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/favicon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/favicon-512.png">
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -692,6 +694,17 @@
         <p style="margin-top: 20px; color: #888; font-size: 0.85rem;">
             © 2026 AntManThePro | NEXUS v1.0
         </p>
+        <p style="margin-top: 10px; font-size: 0.85rem;"><button id="antEggBtn" title="psst — tap the ant" style="background:none;border:none;cursor:pointer;font-size:14px;padding:4px" aria-label="A tiny ant with something to say">🐜</button></p>
+        <p id="antEggMsg" hidden style="margin-top: 8px; color: #00ff87; font-size: 0.85rem; line-height: 1.6;">AntMan built this platform one tool at a time, mostly after midnight.<br><small style="color:#888">Fine print: the ant does no work here — DoubleA does. Six tools, zero shortcuts that matter, and the same rule as the field: not perfect, just real.</small></p>
     </footer>
+    <script>
+    // EASTER EGG: tap the tiny ant in the footer. Shows one line, changes nothing.
+    (function () {
+      var btn = document.getElementById('antEggBtn');
+      var msg = document.getElementById('antEggMsg');
+      if (!btn || !msg) return;
+      btn.addEventListener('click', function () { msg.hidden = !msg.hidden; });
+    })();
+    </script>
 </body>
 </html>
